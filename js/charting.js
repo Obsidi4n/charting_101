@@ -1,6 +1,8 @@
 Chart.defaults.global.responsive = true;
 var chart, chartType;
 var canvas = document.getElementById("chart");
+canvas.width = 1000;
+canvas.height = 550;
 var ctx = canvas.getContext("2d");
 
 function randomNumberJesus()
@@ -75,6 +77,22 @@ function drawChart(el)
 	//     datasetStrokeWidth : 2,
 	//     datasetFill : true,
 	// }
+
+function drawCandle(point){
+		var xcord = point["x"];
+		var open  = point["y"][0];
+		var high  = point["y"][1];
+		var low   = point["y"][2];
+		var close = point["y"][3];
+		ctx.fillStyle = "#6699FF";
+		ctx.strokeStyle = "#333";
+		ctx.beginPath();
+		ctx.moveTo(x,low);
+		ctx.lineTo(x,high);
+		ctx.stroke();
+		ctx.fillRect(xcord-4, open, 8, close-open);
+	}
+
 function redraw(e)
 {
 	if(chartType)
@@ -87,7 +105,7 @@ function setup(){
 	for (var i=0;i<buttons.length;i++)
 		buttons[i].addEventListener("click",drawChart);
 	window.addEventListener("resize",redraw);
-	buttons[0].click();
+	buttons[2].click();
 	console.log("setup compelte");
 }
 setup();
