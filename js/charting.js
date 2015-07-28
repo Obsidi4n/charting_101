@@ -4,6 +4,8 @@ var canvas = document.getElementById("chart");
 canvas.width = canvas.clientWidth;
 canvas.height = canvas.clientHeight;
 var ctx = canvas.getContext("2d");
+var globalHigh=0;
+var globalLow;
 
 function reorderOhlc(values)
 {
@@ -20,6 +22,16 @@ function reorderOhlc(values)
 
 	return ohlc;
 }
+
+function setGlobals(values)
+{
+	if(globalHigh<values[1])
+		globalHigh=values[1];
+	if(!globalLow)
+		globalLow=values[2];
+	else if(globalLow>values[2])
+		globalLow=values[2];
+}
 function randomNumberJesus()
 {
 	var xcoords = [];
@@ -31,8 +43,10 @@ function randomNumberJesus()
 		xcoords.push(i);
 		var values = [];
 		for(var j=0;j<4;j++)
-			values.push(  Math.random() * 1000 );
+			values.push(  Math.random() 
+				* 1000 );
 		values = reorderOhlc(values);
+		setGlobals(values);
 		ycoords.push(values);
 	}
 	return {"x":xcoords,"y":ycoords}
@@ -43,6 +57,9 @@ function getData(ohlc)
 	var data;
 	if (typeof(ohlc)==='undefined')
 	{
+		closePoints = [];
+		for(var i=0;i<randomResults["y"].length;i++)
+			closePoints.push(randomResults["y"][i][3])
 		data = {
 		labels: randomResults["x"],
 		datasets: [
@@ -52,7 +69,7 @@ function getData(ohlc)
 				strokeColor: "rgba(220,220,220,0.8)",
 				highlightFill: "rgba(220,220,220,0.75)",
 				highlightStroke: "rgba(220,220,220,1)",
-				data: randomResults["y"] //[65, 59, 80, 81, 56, 55, 40]
+				data: closePoints //[65, 59, 80, 81, 56, 55, 40]
 			}
 		]
 		};
@@ -125,6 +142,12 @@ function draw(data)
 	var axesPadding = 30;
 	var smallPadding = 10;
 	var overflow = 5;
+    
+    globalHigh = globalHigh+100;
+    globalLow = globalLow-100;
+    var neededPixels=globalHigh-globalLow;
+    var availablePixels = canvas.height-axesPadding-smallPadding;
+    var yfactor=neededPixels/availablePixels;
 
 	ctx.lineWidth = 2;
 	ctx.lineCap = 'round';
@@ -134,6 +157,10 @@ function draw(data)
 	ctx.moveTo(axesPadding, smallPadding);
 	ctx.lineTo(axesPadding, canvas.height-axesPadding+overflow);
 	ctx.stroke();
+
+	//TODO Draw yLabels here
+	
+
 
 	ctx.moveTo(axesPadding-overflow, canvas.height-axesPadding);
 	ctx.lineTo(canvas.width-smallPadding, canvas.height - axesPadding);
@@ -153,6 +180,8 @@ function draw(data)
 		xcoord = axesPadding+i*xLabelSeparation;
 		var p = {};
 		p["x"] = xcoord;
+		for(var j=0; j<4 ; j++)
+			data["y"][i][j]=canvas.height-axesPadding-(data["y"][i][j]/yfactor);
 		p["y"] = data["y"][i];
 		if(i>0)
 		{
@@ -177,8 +206,8 @@ function drawCandle(point)
 	var close = point["y"][3];
 	
 	ctx.beginPath();
-	ctx.moveTo(x,low);
-	ctx.lineTo(x,high);
+	ctx.moveTo(x,high);
+	ctx.lineTo(x,low);
 	ctx.stroke();
 	ctx.fillRect(x-width/2, open, width, close-open);
 }
