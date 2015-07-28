@@ -1,11 +1,8 @@
 Chart.defaults.global.responsive = true;
 var chart, chartType;
 var canvas = document.getElementById("chart");
-canvas.width = canvas.clientWidth;
-canvas.height = canvas.clientHeight;
 var ctx = canvas.getContext("2d");
-var globalHigh=0;
-var globalLow;
+var globalHigh, globalLow;
 
 function reorderOhlc(values)
 {
@@ -32,39 +29,40 @@ function setGlobals(values)
 	else if(globalLow>values[2])
 		globalLow=values[2];
 }
+
 function randomNumberJesus()
 {
-	var xcoords = [];
-	var ycoords = [];
-
-	var count = 100;
+	var count = 50;
+	var data = {};
 	for(var i=0;i<count;i++)
 	{
-		xcoords.push(i);
 		var values = [];
 		for(var j=0;j<4;j++)
-			values.push(  Math.random() 
-				* 1000 );
+			values.push(  Math.random() * 1000 );
 		values = reorderOhlc(values);
 		setGlobals(values);
-		ycoords.push(values);
+		data[i] = values;
 	}
-	return {"x":xcoords,"y":ycoords}
+	return data;
 }
+
 function getData(ohlc)
 {
+	globalHigh=0;
+	globalLow=undefined;
+
 	var randomResults = randomNumberJesus();
 	var data;
 	if (typeof(ohlc)==='undefined')
 	{
 		closePoints = [];
-		for(var i=0;i<randomResults["y"].length;i++)
-			closePoints.push(randomResults["y"][i][3])
+		for(var  key in randomResults)
+			closePoints.push(randomResults[key][3])
 		data = {
-		labels: randomResults["x"],
+		labels: Object.keys(randomResults),
 		datasets: [
 			{
-				label: "Samle data",
+				label: "Sample data",
 				fillColor: "rgba(220,220,220,0.7)",
 				strokeColor: "rgba(220,220,220,0.8)",
 				highlightFill: "rgba(220,220,220,0.75)",
@@ -84,8 +82,9 @@ function drawChart(el)
 	chartType = el.currentTarget.id;
 	if(chart)
 	{
-		chart.destroy();
-    	delete chart;
+		if(typeof(chart) === 'object')
+			chart.destroy();
+		chart = undefined;
     	ctx.clearRect(0,0,canvas.width,canvas.height);
 	}
 
@@ -98,25 +97,12 @@ function drawChart(el)
 	    barShowStroke: false
 		});
 	else if (chartType === "candlestick")
+	{
 		draw(getData(true));
-		//ctx.fillText("Still working on this", canvas.width/2, canvas.height/2);
+		chart = true;
+	}
 }
-	// var options = {
-	// 	caleShowGridLines : true,
-	//     scaleGridLineColor : "rgba(0,0,0,.05)",
-	//     scaleGridLineWidth : 1,
-	//     scaleShowHorizontalLines: true,
-	//     scaleShowVerticalLines: false,
-	//     bezierCurve : false,
-	//     bezierCurveTension : 0,
-	//     pointDot : true,
-	//     pointDotRadius : 1,
-	//     pointDotStrokeWidth : 1,
-	//     pointHitDetectionRadius : 20,
-	//     datasetStroke : true,
-	//     datasetStrokeWidth : 2,
-	//     datasetFill : true,
-	// }
+
 function redraw(e)
 {
 	canvas.width = canvas.clientWidth;
@@ -125,26 +111,17 @@ function redraw(e)
 		document.getElementById(chartType).click();
 }
 
-function setup(){
-	console.log("setting up");
-	var buttons = document.getElementsByClassName("button");
-	for (var i=0;i<buttons.length;i++)
-		buttons[i].addEventListener("click",drawChart);
-	window.addEventListener("resize",redraw);
-	buttons[2].click();
-	console.log("setup complete");
-}
-setup();
-
 function draw(data)
 {
 	var xLabelSeparation = 30;
 	var axesPadding = 30;
 	var smallPadding = 10;
+	var offset = 3
 	var overflow = 5;
     
-    globalHigh = globalHigh+100;
-    globalLow = globalLow-100;
+    globalHigh = Math.ceil(globalHigh/100)*100;
+    globalLow = Math.floor(globalLow/100)*100;
+
     var neededPixels=globalHigh-globalLow;
     var availablePixels = canvas.height-axesPadding-smallPadding;
     var yfactor=neededPixels/availablePixels;
@@ -159,30 +136,33 @@ function draw(data)
 	ctx.stroke();
 
 	//TODO Draw yLabels here
-	
+	ctx.textAlign='right';
+	ctx.fillText(globalHigh, axesPadding-2, smallPadding+offset);
 
+	ctx.fillText(globalLow, axesPadding-overflow-2, canvas.height-axesPadding+offset);
 
 	ctx.moveTo(axesPadding-overflow, canvas.height-axesPadding);
 	ctx.lineTo(canvas.width-smallPadding, canvas.height - axesPadding);
 	ctx.stroke();
 
-	count = (((((canvas.width-axesPadding-smallPadding)/xLabelSeparation)+ 0.5) << 1) >> 1);
-	console.log(canvas.width-axesPadding-smallPadding);
-	console.log(count);
-
 	ctx.closePath();
 
+	count = (((((canvas.width-axesPadding-smallPadding)/xLabelSeparation)+ 0.5) << 1) >> 1);
+	
 	ctx.lineWidth = 1;
+	ctx.textAlign="center";
 	// ctx.strokeStyle = '#555';
 	// ctx.beginPath();
+	keys = Object.keys(data);
 	for (var i=0;i<count;i++)
 	{
 		xcoord = axesPadding+i*xLabelSeparation;
+		key = keys[i];
 		var p = {};
 		p["x"] = xcoord;
 		for(var j=0; j<4 ; j++)
-			data["y"][i][j]=canvas.height-axesPadding-(data["y"][i][j]/yfactor);
-		p["y"] = data["y"][i];
+			data[key][j]=canvas.height-axesPadding-(data[key][j]/yfactor);
+		p["y"] = data[key];
 		if(i>0)
 		{
 			// ctx.moveTo(xcoord, smallPadding);
@@ -190,9 +170,10 @@ function draw(data)
 			// ctx.stroke();
 			drawCandle(p);
 		}
-		ctx.fillText(data["x"][i], xcoord-3, canvas.height-axesPadding/2);
+		ctx.fillText(key, xcoord, canvas.height-axesPadding/2);
 	}
 }
+
 function drawCandle(point)
 {
 	var width = 10;
@@ -211,3 +192,19 @@ function drawCandle(point)
 	ctx.stroke();
 	ctx.fillRect(x-width/2, open, width, close-open);
 }
+
+function setup(){
+	console.log("setting up");
+
+	canvas.width = canvas.clientWidth;
+	canvas.height = canvas.clientHeight;
+
+	var buttons = document.getElementsByClassName("button");
+	for (var i=0;i<buttons.length;i++)
+		buttons[i].addEventListener("click",drawChart);
+	window.addEventListener("resize",redraw);
+	buttons[2].click();
+
+	console.log("setup complete");
+}
+setup();
