@@ -88,15 +88,19 @@ function drawChart(el)
     	ctx.clearRect(0,0,canvas.width,canvas.height);
 	}
 
-	// if (chartType === "line")
-	// 	chart = new Chart(ctx).Line(getData(), {
-	// 		bezierCurve: false
-	// 		});
-	// else
-	// {
-		draw(chartType, getData(true));
+	if (chartType === "line")
+		chart = new Chart(ctx).Line(getData(), {
+			bezierCurve: false
+			});
+	else if (chartType === "bar")
+	chart = new Chart(ctx).Bar(getData(), {
+	    barShowStroke: false
+		});
+	else if (chartType === "candlestick")
+	{
+		draw(getData(true));
 		chart = true;
-	// }
+	}
 }
 
 function redraw(e)
@@ -107,7 +111,7 @@ function redraw(e)
 		document.getElementById(chartType).click();
 }
 
-function draw(chartType, data)
+function draw(data)
 {
 	var xLabelSeparation = 30;
 	var axesPadding = 30;
@@ -118,9 +122,30 @@ function draw(chartType, data)
     globalHigh = Math.ceil(globalHigh/100)*100;
     globalLow = Math.floor(globalLow/100)*100;
 
-    var businessLimits=globalHigh-globalLow;
-    var displayLimits = canvas.height-axesPadding-smallPadding;
-    var yfactor=businessLimits/displayLimits;
+    var neededPixels=globalHigh-globalLow;
+    var availablePixels = canvas.height-axesPadding-smallPadding;
+    var yfactor=neededPixels/availablePixels;
+
+	ctx.lineWidth = 2;
+	ctx.lineCap = 'round';
+	ctx.strokeStyle = '#000';
+	
+	ctx.beginPath();
+	ctx.moveTo(axesPadding, smallPadding);
+	ctx.lineTo(axesPadding, canvas.height-axesPadding+overflow);
+	ctx.stroke();
+
+	//TODO Draw yLabels here
+	ctx.textAlign='right';
+	ctx.fillText(globalHigh, axesPadding-2, smallPadding+offset);
+
+	ctx.fillText(globalLow, axesPadding-overflow-2, canvas.height-axesPadding+offset);
+
+	ctx.moveTo(axesPadding-overflow, canvas.height-axesPadding);
+	ctx.lineTo(canvas.width-smallPadding, canvas.height - axesPadding);
+	ctx.stroke();
+
+	ctx.closePath();
 
 	count = (((((canvas.width-axesPadding-smallPadding)/xLabelSeparation)+ 0.5) << 1) >> 1);
 	
@@ -143,49 +168,16 @@ function draw(chartType, data)
 			// ctx.moveTo(xcoord, smallPadding);
 			// ctx.lineTo(xcoord, canvas.height-axesPadding);
 			// ctx.stroke();
-			if(chartType==='bar')
-				drawBar(p, axesPadding, xLabelSeparation);
-			else if (chartType==='line'&& i<count-1)
-			{
-				var p1 = {};
-				p1["x"] = xcoord+xLabelSeparation;
-				p1["y"] = canvas.height-axesPadding-(data[keys[i+1]][3]/yfactor);
-				drawLine(p, p1, axesPadding);
-			}
-			else if (chartType==='candlestick')
-				drawCandle(p, xLabelSeparation);
+			drawCandle(p);
 		}
 		ctx.fillText(key, xcoord, canvas.height-axesPadding/2);
 	}
-	ctx.translate(.5, .5);
-
-
-	ctx.lineWidth = 1;
-	ctx.lineCap = 'round';
-	ctx.strokeStyle = '#000';
-	
-	ctx.beginPath();
-	ctx.moveTo(axesPadding, smallPadding);
-	ctx.lineTo(axesPadding, canvas.height-axesPadding+overflow);
-	ctx.stroke();
-
-	//TODO Draw yLabels here
-	ctx.textAlign='right';
-	//ctx.fillText(globalHigh, axesPadding-2, smallPadding+offset);
-	for (var i=globalLow+100; i<=globalHigh; i=i+100)
-		ctx.fillText(i, axesPadding-2, canvas.height-axesPadding-i/yfactor);
-	ctx.fillText(globalLow, axesPadding-overflow-2, canvas.height-axesPadding+offset);
-
-	ctx.moveTo(axesPadding-overflow, canvas.height-axesPadding);
-	ctx.lineTo(canvas.width-smallPadding, canvas.height - axesPadding);
-	ctx.stroke();
-
-	ctx.closePath();
 }
 
-function drawCandle(point, xLabelSeparation)
+function drawCandle(point)
 {
-	var width = xLabelSeparation/3;
+	var width = 10;
+	ctx.fillStyle = "#6699FF";
 	ctx.strokeStyle = "#333";
 
 	var x = point["x"];
@@ -193,40 +185,12 @@ function drawCandle(point, xLabelSeparation)
 	var high  = point["y"][1];
 	var low   = point["y"][2];
 	var close = point["y"][3];
-	if(open<=close)
-		ctx.fillStyle = "#6699FF";
-	else
-		ctx.fillStyle = "#FF3366";
+	
 	ctx.beginPath();
 	ctx.moveTo(x,high);
 	ctx.lineTo(x,low);
 	ctx.stroke();
 	ctx.fillRect(x-width/2, open, width, close-open);
-}
-
-function drawBar(point, axesPadding, xLabelSeparation)
-{
-	var width = xLabelSeparation/2;
-	ctx.fillStyle = "#6699FF";
-	ctx.strokeStyle = "#333";
-	var x = point["x"];
-	var close = point["y"][3];
-	ctx.fillRect(x-width/2, canvas.height-axesPadding-close, width, close);
-	
-}
-function drawLine(point, point1, axesPadding)
-{
-	ctx.lineWidth=1;
-	ctx.strokeStyle = "#6699FF";
-	var x = point["x"];
-	var close = Math.round(point["y"][3]);
-
-	var x1 = point1["x"];
-	var close1 = Math.round(point1["y"]);
-
-	ctx.moveTo(x,close);
-	ctx.lineTo(x1,close1);
-	ctx.stroke();	
 }
 
 function setup(){
@@ -239,7 +203,7 @@ function setup(){
 	for (var i=0;i<buttons.length;i++)
 		buttons[i].addEventListener("click",drawChart);
 	window.addEventListener("resize",redraw);
-	buttons[0].click();
+	buttons[2].click();
 
 	console.log("setup complete");
 }
