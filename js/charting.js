@@ -136,7 +136,8 @@ function draw(chartType, data)
 		else if (i>0)
 		{
 			if(chartType==='bar')
-				drawBar(p, axesPadding, xLabelSeparation);
+				drawBarcandle(p, overflow);
+				// drawBar(p, axesPadding, xLabelSeparation);
 			else if (chartType==='candlestick')
 				drawCandle(p, xLabelSeparation);
 		}
@@ -191,7 +192,30 @@ function drawCandle(point, xLabelSeparation)
 
 	ctx.fillRect(x-width/2, open, width, close-open);
 }
-
+function drawBarcandle(point, overflow)
+{
+	var width =1;
+	ctx.fillStyle = "#6699FF";
+	ctx.strokeStyle = "#333";
+	var x = point["x"];
+	var open  = point["y"][0];
+	var high  = point["y"][1];
+	var low   = point["y"][2];
+	var close = point["y"][3];
+	ctx.beginPath();
+	ctx.moveTo(x,high);
+	ctx.lineTo(x,low);
+	ctx.stroke();
+	ctx.moveTo(x,open);
+	ctx.lineTo(x-overflow,open);
+	ctx.stroke();
+	ctx.moveTo(x,close);
+	ctx.lineTo(x+overflow,close);
+	ctx.stroke();
+	//ctx.fillRect(x-0.5, open-0.5, 1, 1);
+	//ctx.fillRect(x-0.5, close-0.5, 1, 1);
+	
+}
 function drawBar(point, axesPadding, xLabelSeparation)
 {
 	var width = xLabelSeparation/2;
