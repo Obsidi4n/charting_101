@@ -1,9 +1,19 @@
-Chart.defaults.global.responsive = true;
 var chart, chartType;
 var canvas = document.getElementById("chart");
 var ctx = canvas.getContext("2d");
+var plottablePoints;
+
 var globalHigh, globalLow;
 var scale = 2;
+
+var xLabelSeparation = scale*20;
+var axesPadding = scale*30;
+var smallPadding = scale*10;
+var offset = scale*3;
+var overflow = scale*5;
+
+var ohlcData;
+var selectedScale = '1days';
 
 function setGlobals(values)
 {
@@ -35,35 +45,61 @@ function randomNumberJesus()
 	return data;
 }
 
-function getData(ohlc)
+function getData()
 {
 	globalHigh=0;
-	globalLow=undefined;
+	globalLow=null;
+	ohlcData = null;
 
 	var randomResults = randomNumberJesus();
-	var data;
-	if (typeof(ohlc)==='undefined')
-	{
-		closePoints = [];
-		for(var  key in randomResults)
-			closePoints.push(randomResults[key][3])
-		data = {
-		labels: Object.keys(randomResults),
-		datasets: [
-			{
-				label: "Sample data",
-				fillColor: "rgba(220,220,220,0.7)",
-				strokeColor: "rgba(220,220,220,0.8)",
-				highlightFill: "rgba(220,220,220,0.75)",
-				highlightStroke: "rgba(220,220,220,1)",
-				data: closePoints //[65, 59, 80, 81, 56, 55, 40]
-			}
-		]
-		};
-	}
-	else
-		data = randomResults;
-	return data;
+	
+	var xhr = new XMLHttpRequest()
+	xhr.open('POST', '/dataSource');
+	xhr.setRequestHeader('content-type','application/x-www-form-urlencoded');
+	xhr.onreadystatechange = function (e) {
+		if (xhr.readyState==4 && xhr.status==200)
+		{
+			ohlcData = JSON.parse(this.response);
+			draw();
+		}
+	};
+	var date = new Date();
+	console.log(date.toISOString());
+
+	urlParams = 'date='+ date.toString() +'&scale='+selectedScale+'&count=' + 2*plottablePoints ;
+	xhr.send( urlParams );
+	// var data;
+	// if (typeof(ohlc)==='undefined')
+	// {
+	// 	closePoints = [];
+	// 	for(var  key in randomResults)
+	// 		closePoints.push(randomResults[key][3])
+	// 	data = {
+	// 	labels: Object.keys(randomResults),
+	// 	datasets: [
+	// 		{
+	// 			label: "Sample data",
+	// 			fillColor: "rgba(220,220,220,0.7)",
+	// 			strokeColor: "rgba(220,220,220,0.8)",
+	// 			highlightFill: "rgba(220,220,220,0.75)",
+	// 			highlightStroke: "rgba(220,220,220,1)",
+	// 			data: closePoints //[65, 59, 80, 81, 56, 55, 40]
+	// 		}
+	// 	]
+	// 	};
+	// }
+	// else
+	// 	data = randomResults;
+	return randomResults;
+}
+
+function redraw(e)
+{
+	canvas.width = scale*canvas.clientWidth;
+	canvas.height = scale*canvas.clientHeight;
+	plottablePoints = (((((canvas.width-axesPadding-smallPadding)/xLabelSeparation)+ 0.5) << 1) >> 1);
+	if(chartType)
+		document.getElementById(chartType).click();
 }
 
 function drawChart(el)
@@ -71,32 +107,21 @@ function drawChart(el)
 	chartType = el.currentTarget.id;
 	if(chart)
 	{
-		chart = undefined;
+		chart = false;
     	ctx.clearRect(0,0,canvas.width,canvas.height);
 	}
-	draw(chartType, getData(true));
-	chart = true;
+	if (ohlcData)
+		draw();
+	else
+		getData();
 	// if (chartType === "line")
 	// 	chart = new Chart(ctx).Line(getData(), {
 	// 		bezierCurve: false
 	// 		});
 }
 
-function redraw(e)
+function draw()
 {
-	canvas.width = scale*canvas.clientWidth;
-	canvas.height = scale*canvas.clientHeight;
-	if(chartType)
-		document.getElementById(chartType).click();
-}
-
-function draw(chartType, data)
-{
-	var xLabelSeparation = scale*30;
-	var axesPadding = scale*30;
-	var smallPadding = scale*10;
-	var offset = scale*3;
-	var overflow = scale*5;
     
     globalHigh = Math.ceil(globalHigh/100)*100;
     globalLow = Math.floor(globalLow/100)*100;
@@ -104,8 +129,6 @@ function draw(chartType, data)
     var businessLimits=globalHigh-globalLow;
     var displayLimits = canvas.height-axesPadding-smallPadding;
     var yfactor=businessLimits/displayLimits;
-
-	count = (((((canvas.width-axesPadding-smallPadding)/xLabelSeparation)+ 0.5) << 1) >> 1);
 	
 	ctx.lineWidth = scale*1;
 	ctx.lineJoin = 'round';
@@ -115,33 +138,33 @@ function draw(chartType, data)
 	ctx.font='24px sans-serif';
 	ctx.beginPath();
 	
-	keys = Object.keys(data);
-	for (var i=0;i<count;i++)
+	keys = Object.keys(ohlcData);
+	for (var i=plottablePoints;i<2*plottablePoints-1;i++)
 	{
-		xcoord = axesPadding+i*xLabelSeparation;
+		xcoord = axesPadding+(i-plottablePoints)*xLabelSeparation;
 		key = keys[i];
 		var p = {};
 		p["x"] = xcoord;
 		scaledY = [];
 		for(var j=0; j<4 ; j++)
-			scaledY.push(canvas.height-axesPadding-(data[key][j]/yfactor));
+			scaledY.push(canvas.height-axesPadding-(ohlcData[key][j]/yfactor));
 		p["y"] = scaledY;
-		if( chartType==='line' && i<count-1)
+		if( chartType==='line' && ohlcData[keys[i+1]])
 		{
 			var p1 = {};
 			p1["x"] = xcoord+xLabelSeparation;
-			p1["y"] = canvas.height-axesPadding-(data[keys[i+1]][3]/yfactor);
+			p1["y"] = canvas.height-axesPadding-(ohlcData[keys[i+1]][3]/yfactor);
 			drawLine(p, p1, axesPadding);
 		}
 		else if (i>0)
 		{
 			if(chartType==='bar')
-				drawBarcandle(p, overflow);
-				// drawBar(p, axesPadding, xLabelSeparation);
+				drawBar(p, axesPadding, xLabelSeparation);
 			else if (chartType==='candlestick')
 				drawCandle(p, xLabelSeparation);
 		}
-		ctx.fillText(key, xcoord, canvas.height-axesPadding/2);
+		if(i%4==0)
+			ctx.fillText(key, xcoord, canvas.height-axesPadding/2);
 	}
 
 	ctx.closePath();
@@ -167,6 +190,8 @@ function draw(chartType, data)
 	ctx.stroke();
 
 	ctx.closePath();
+
+	chart = true;
 }
 
 function drawCandle(point, xLabelSeparation)
@@ -192,30 +217,7 @@ function drawCandle(point, xLabelSeparation)
 
 	ctx.fillRect(x-width/2, open, width, close-open);
 }
-function drawBarcandle(point, overflow)
-{
-	var width =1;
-	ctx.fillStyle = "#6699FF";
-	ctx.strokeStyle = "#333";
-	var x = point["x"];
-	var open  = point["y"][0];
-	var high  = point["y"][1];
-	var low   = point["y"][2];
-	var close = point["y"][3];
-	ctx.beginPath();
-	ctx.moveTo(x,high);
-	ctx.lineTo(x,low);
-	ctx.stroke();
-	ctx.moveTo(x,open);
-	ctx.lineTo(x-overflow,open);
-	ctx.stroke();
-	ctx.moveTo(x,close);
-	ctx.lineTo(x+overflow,close);
-	ctx.stroke();
-	//ctx.fillRect(x-0.5, open-0.5, 1, 1);
-	//ctx.fillRect(x-0.5, close-0.5, 1, 1);
-	
-}
+
 function drawBar(point, axesPadding, xLabelSeparation)
 {
 	var width = xLabelSeparation/2;
@@ -243,14 +245,13 @@ function drawLine(point, point1, axesPadding)
 function setup(){
 	console.log("setting up");
 
-	canvas.width = scale*canvas.clientWidth;
-	canvas.height = scale*canvas.clientHeight;
-
 	var buttons = document.getElementsByClassName("button");
 	for (var i=0;i<buttons.length;i++)
 		buttons[i].addEventListener("click",drawChart);
 	window.addEventListener("resize",redraw);
-	buttons[0].click();
+
+	chartType = "line";
+	redraw(null);
 
 	console.log("setup complete");
 }
