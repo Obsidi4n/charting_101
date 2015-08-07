@@ -7,33 +7,43 @@
 	<link type="text/css" rel="stylesheet" href="css/style.css">
 </head>
 <body>
-<div id="canvas">
-<div id="tooltip">
-<table>
-<tr><td>O</td><td></td></tr>
-<tr><td>H</td><td></td></tr>
-<tr><td>L</td><td></td></tr>
-<tr><td>C</td><td></td></tr>
-</table>
+<div id="chartControls">
+	<div id="topBar">
+		<div id="15min" class="tabs activeTab">15min</div>
+		<div id="30min" class="tabs">30min</div>
+		<div id="1hour" class="tabs">1hour</div>
+		<div id="4hours" class="tabs">4hours</div>
+		<div id="1day" class="tabs">1day</div>
+		<div id="1week" class="tabs">1week</div>
+		<div class="tabs">
+			<div class="table">
+				<div class="middleCell">
+					<img class="desaturate" src="img/activebulbsmall.png"/>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div id="chartArea">
+		<div id="tooltip">
+			<div id="open"></div>
+			<div id="high"></div>
+			<div id="low"></div>
+			<div id="close"></div>
+		</div>
+		<div id="loading" class="fill table" align="center">
+			<div class="middleCell">
+				<img class="desaturate" src="img/activebulbsmall.png"/>
+				<div class="loader">Loading...</div>
+			</div>
+		</div>
+		<div id="canvasMask" class="fill">
+			<div id="largeCanvas">
+				<canvas id="canvas" class="fill"></canvas>
+			</div>
+		</div>
+	</div>
 </div>
-<div class="loading" align="center">
-<div class="loader">Loading...</div>
-</div>
-<div class="pad" >
-<ul class="tabMenu">
-<li class="tabs activeTab">15mins</li>
-<li class="tabs">30mins</li>
-<li class="tabs">1hour</li>
-<li class="tabs">1days</li>
-<li class="tabs">1week</li>
-<li class="tabs">1mont</li>
-<li class="tabs"><img class="desaturate" src="img/activebulbsmall.png"/></li>
-</ul>
-</div>
-	<canvas id="chart">
-    </canvas>
-</div>
-<div class="buttonBar" align="center">
+<div id="buttonBar" align="center">
 	<div class="buttonContainers">	
 		<div class="button active" id="line">
 			<img class="icon" src="img/lineChartIcon.png">

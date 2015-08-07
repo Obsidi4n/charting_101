@@ -1,5 +1,5 @@
 var chart, chartType;
-var canvas = document.getElementById("chart");
+var canvas = document.getElementById("canvas");
 var ctx = canvas.getContext("2d");
 var plottablePoints;
 
@@ -14,7 +14,7 @@ var overflow = scale*5;
 
 var ohlcData;
 var screenData=[];
-var selectedScale = '1days';
+var selectedScale = '30min';
 
 canvas.addEventListener('click', function(evt) {
 		mousePos = getMousePos(canvas, evt);
@@ -120,6 +120,7 @@ function getData()
 		if (xhr.readyState==4 && xhr.status==200)
 		{
 			ohlcData = JSON.parse(this.response);
+			console.log('Data received', Object.keys(ohlcData).length);
 			draw();
 		}
 	};
@@ -128,28 +129,7 @@ function getData()
 
 	urlParams = 'date='+ date.toString() +'&scale='+selectedScale+'&count=' + 2*plottablePoints ;
 	xhr.send( urlParams );
-	// var data;
-	// if (typeof(ohlc)==='undefined')
-	// {
-	// 	closePoints = [];
-	// 	for(var  key in randomResults)
-	// 		closePoints.push(randomResults[key][3])
-	// 	data = {
-	// 	labels: Object.keys(randomResults),
-	// 	datasets: [
-	// 		{
-	// 			label: "Sample data",
-	// 			fillColor: "rgba(220,220,220,0.7)",
-	// 			strokeColor: "rgba(220,220,220,0.8)",
-	// 			highlightFill: "rgba(220,220,220,0.75)",
-	// 			highlightStroke: "rgba(220,220,220,1)",
-	// 			data: closePoints //[65, 59, 80, 81, 56, 55, 40]
-	// 		}
-	// 	]
-	// 	};
-	// }
-	// else
-	// 	data = randomResults;
+
 	return randomResults;
 }
 
@@ -158,8 +138,7 @@ function redraw(e)
 	canvas.width = scale*canvas.clientWidth;
 	canvas.height = scale*canvas.clientHeight;
 	plottablePoints = (((((canvas.width-axesPadding-smallPadding)/xLabelSeparation)+ 0.5) << 1) >> 1);
-	if(chartType)
-		document.getElementById(chartType).click();
+	document.getElementById(chartType).click();
 }
 
 function drawChart(el)
@@ -177,23 +156,15 @@ function drawChart(el)
 	lastIndex = src.lastIndexOf('/');
 	el.currentTarget.children[0].src = src.slice(0,lastIndex)+'/active' + src.slice(lastIndex+1);
 	
-	if(chart)
-	{
-		chart = false;
-    	ctx.clearRect(0,0,canvas.width,canvas.height);
-	}
 	if (ohlcData)
 		draw();
 	else
 		getData();
-	// if (chartType === "line")
-	// 	chart = new Chart(ctx).Line(getData(), {
-	// 		bezierCurve: false
-	// 		});
 }
 
 function draw()
 {
+	ctx.clearRect(0,0,canvas.width,canvas.height);
     
     globalHigh = Math.ceil(globalHigh/100)*100;
     globalLow = Math.floor(globalLow/100)*100;
@@ -237,8 +208,21 @@ function draw()
 			else if (chartType==='candlestick')
 				drawCandle(p, xLabelSeparation);
 		}
-		if(i%4==0)
-			ctx.fillText(key, xcoord, canvas.height-axesPadding/2);
+		if(i%3==0)
+		{
+			if(selectedScale.indexOf('min')>0)
+			{
+				if (key.indexOf('16:30')==0)
+					label = key.split(' ').splice(1,2).join(' ');
+				else
+					label = key.split(' ')[0];
+			}
+			else
+			{
+				label = key.split(' ').splice(1,2).join(' ');
+			}
+			ctx.fillText(label, xcoord, canvas.height-axesPadding/2);
+		}
 	}
 
 	ctx.closePath();
@@ -363,12 +347,31 @@ function drawCricle(p)
 	//ctx.strokeStyle = "#6699FF";
 	ctx.stroke();
 } 
-function setup(){
+
+function changeScale(el)
+{
+	prevActive = document.getElementsByClassName('activeTab')[0];
+	prevActive.className = prevActive.className.replace( /(?:^|\s)activeTab(?!\S)/g , '' );
+	
+	el.currentTarget.className = el.currentTarget.className + ' activeTab';
+	selectedScale = el.currentTarget.id;
+
+	//TODO
+	getData();
+}
+
+function setup()
+{
 	console.log("setting up");
 
-	var buttons = document.getElementsByClassName("button");
+	buttons = document.getElementsByClassName("button");
 	for (var i=0;i<buttons.length;i++)
 		buttons[i].addEventListener("click",drawChart);
+
+	tabs = document.getElementsByClassName("tabs");
+	for (var i=0;i<tabs.length-1;i++)			//Ignore last tab
+		tabs[i].addEventListener("click",changeScale);
+
 	window.addEventListener("resize",redraw);
 
 	chartType = "line";
@@ -377,4 +380,3 @@ function setup(){
 	console.log("setup complete");
 }
 setup();
-

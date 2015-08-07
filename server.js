@@ -47,14 +47,26 @@ Date.prototype.deductTime = function (unit, measure) {
 			this.setMinutes(this.getMinutes()-1*unit);
 		}
 	}
+	else if (measure.indexOf('hour')===0)
+	{
+		this.setHours(this.getHours()-1*unit);
+		if (unit==4 && this.getHours()==8)
+			this.setHours(9)
+		else if (this.getHours()<9)
+			this.limitToMarketOpen()
+	}
 	else if (measure.indexOf('day')===0)
+	{
 		this.setDate(this.getDate()-1*unit);
+		this.limitToMarketOpen();
+	}
 	else if (measure.indexOf('week')===0)
 		this.setDate(this.getDate()-7*unit);
 };
 
 Date.prototype.formatDate = function (measure) {
-	return this.getDate() + ' ' + months[this.getMonth()] + ' ' + ("0"+this.getHours()).slice(-2) + ':' + ("0"+this.getMinutes()).slice(-2);
+	time = ("0"+this.getHours()).slice(-2) + ':' + ("0"+this.getMinutes()).slice(-2);
+	return time + ' ' + this.getDate() + ' ' + months[this.getMonth()] + ' ' + this.getFullYear();
 };
 
 router.post('/dataSource',function(req,res){
@@ -62,8 +74,8 @@ router.post('/dataSource',function(req,res){
 	console.log(req.body['date']);
 
 	var date = new Date(req.body['date']);
-	var unit = req.body['scale'].slice(0,-4);
-	var measure = req.body['scale'].slice(-4);
+	var unit = req.body['scale'].replace(/\D/g, '');			//Replace all non-numerals with ''
+	var measure = req.body['scale'].replace(/[^a-z]/gi, '');	//Replace all non-alphabets with ''
 	var count = req.body['count'];
 
 	console.log('Units '+ unit);
@@ -72,14 +84,14 @@ router.post('/dataSource',function(req,res){
 
 	labelStamp = clipTimeToScale(date, unit, measure);
 	var data = {};
-	var open = Math.random() * 1000;
+	var close = Math.random() * 1000;
 	// globalHighest = 0;
 	// globalLow = null;
 	for(var i=0;i<count;i++)
 	{
-		high = open + Math.random() * (1000-open);  //Random number greater than open
-		low = open - Math.random() * open;   		//Random number lesser than open
-		close = low + Math.random() * (high-low) ;	//Random number between high and low
+		high = close + Math.random() * (1000-close);  //Random number greater than close
+		low = close - Math.random() * close;   		//Random number lesser than open
+		open = low + Math.random() * (high-low) ;	//Random number between high and low
 
 		var values = [open, high, low, close];
 		// setGlobals(values);
@@ -95,7 +107,7 @@ router.post('/dataSource',function(req,res){
 		}
 		// console.log(label);
 		data[label] = values;
-		open = close;
+		close = open;
 	}
 	console.log(labelStamp);
 	console.log('Data length', Object.keys(data).length)
@@ -105,15 +117,14 @@ router.post('/dataSource',function(req,res){
 function clipTimeToScale(date, unit, measure)
 {
 	date.setTime( date.getTime() + date.getTimezoneOffset()*60*1000 );
-	console.log(date);
+	console.log("Before clipping",date);
 	date.setMilliseconds(0);
 	date.setSeconds(0);
 
 	//If before or after market hours
 	date.limitToMarketOpen();
-	
+	console.log("After limiting",date);
 	min = date.getMinutes();
-	hour = date.getHours();
 
 	//Round to closest scale multiple
 	if (measure.indexOf('min')===0)
@@ -126,15 +137,17 @@ function clipTimeToScale(date, unit, measure)
 		date.setMinutes(0);
 		if (measure.indexOf('hour')===0)
 		{
+			hour = date.getHours();
+			hour = hour - (hour%unit);
 			date.setHours(hour);	//Just to make sure that case does not goto else block below
 		}
 		else 
 		{
-
+			hour = date.getHours();
 			date.setHours(17);
 			if (measure.indexOf('day')===0)
 			{
-				if(hour >= 9)					//Date has already been set back by a day if less then 9
+				if(hour >= 9 && hour < 17 )					//Date has already been set back by a day if less then 9
 					date.setDate(date.getDate() - 1);
 				while(date.getDay() === 0 || date.getDay() === 6)
 					date.setDate(date.getDate() - 1);
@@ -149,7 +162,7 @@ function clipTimeToScale(date, unit, measure)
 			}
 		}
 	}
-	console.log(date);
+	console.log("After clipping", date);
 	return date;
 }
 
