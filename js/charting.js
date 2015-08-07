@@ -34,8 +34,7 @@ function showTooltip(pos, radius){
         var mouseX=pos.x;
         var mouseY=pos.y;
         // var message =  mouseX+ ',' + mouseY;
-        found = false;
-    //     
+        found = false;     
         for (var i = 0; i < screenData.length; i++) 
         {
         	var point = screenData[i];
@@ -48,20 +47,10 @@ function showTooltip(pos, radius){
         		break;
         	}
 
-    //         //tooltipSpan.style.left = (point["x"]) +40 +"px";
-    //         //tooltipSpan.style.top = (point["y"][3] + 40) + "px";
-    //         //tipctx.clearRect(0, 0, tipcanvas.width, tipcanvas.height);
-    //         //                  tipCtx.rect(0,0,tipCanvas.width,tipCanvas.height);
-    //         //document.getElementById('tooltip').innerHTML = message
-    //         //tipctx.fillText(message, 5, 15);
-    //         //hit = true;
-    //     }
 
     	}
     	if (!found) 
     		document.getElementById("tooltip").innerHTML='';
-    // }
-    // writeMessage(message);
 }
 
 function getMousePos(canvas, evt) {
@@ -80,6 +69,10 @@ function writeMessage(index) {
         document.getElementById("tooltip").innerHTML=message;
         tooltipSpan.style.top = (y + 20) + 'px';
     	tooltipSpan.style.left = (index+1 + 20) + 'px';
+}
+function switchLights()
+{
+	console.log("ChangingLights");
 }
 
 function setGlobals(values)
@@ -172,6 +165,18 @@ function redraw(e)
 function drawChart(el)
 {
 	chartType = el.currentTarget.id;
+	
+	prevActive = document.getElementsByClassName('active')[0];
+	prevActive.className = prevActive.className.replace( /(?:^|\s)active(?!\S)/g , '' );
+	src = prevActive.children[0].src;
+	lastIndex = src.lastIndexOf('/');
+	prevActive.children[0].src = src.slice(0,lastIndex)+'/' + src.slice(lastIndex+1).replace( 'active', '' );
+	
+	el.currentTarget.className = el.currentTarget.className + ' active';
+	src = el.currentTarget.children[0].src;
+	lastIndex = src.lastIndexOf('/');
+	el.currentTarget.children[0].src = src.slice(0,lastIndex)+'/active' + src.slice(lastIndex+1);
+	
 	if(chart)
 	{
 		chart = false;
@@ -372,3 +377,4 @@ function setup(){
 	console.log("setup complete");
 }
 setup();
+

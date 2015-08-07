@@ -8,11 +8,34 @@
 </head>
 <body>
 <div id="canvas">
-	<canvas id="chart"></canvas>
+<div id="tooltip">
+<table>
+<tr><td>O</td><td></td></tr>
+<tr><td>H</td><td></td></tr>
+<tr><td>L</td><td></td></tr>
+<tr><td>C</td><td></td></tr>
+</table>
 </div>
-<div class="buttonBar" style="">
+<div class="loading" align="center">
+<div class="loader">Loading...</div>
+</div>
+<div class="pad" >
+<ul class="tabMenu">
+<li class="tabs activeTab">15mins</li>
+<li class="tabs">30mins</li>
+<li class="tabs">1hour</li>
+<li class="tabs">1days</li>
+<li class="tabs">1week</li>
+<li class="tabs">1mont</li>
+<li class="tabs"><img class="desaturate" src="img/activebulbsmall.png"/></li>
+</ul>
+</div>
+	<canvas id="chart">
+    </canvas>
+</div>
+<div class="buttonBar" align="center">
 	<div class="buttonContainers">	
-		<div class="button" id="line">
+		<div class="button active" id="line">
 			<img class="icon" src="img/lineChartIcon.png">
 			<div class="buttonText">
 				<span>Line</span>
@@ -36,6 +59,7 @@
 		</div>
 	</div>
 </div>
+
 <script type="text/javascript" src="js/charting.js"></script>
 </body>
 </html>

@@ -30,7 +30,7 @@ body
 }
 .buttonContainers
 {
-	width: 30%;
+	min-width: 150px;
 	height: 100%;
     display: inline-block;
 	text-align: center;
@@ -38,7 +38,7 @@ body
 .button
 {
 	height: 60%;
-	background: #333;
+	background-color:#333;	
 	border-radius: 5px;
 	color: #CCC;
 	border: none;
@@ -48,6 +48,54 @@ body
 	padding: 0 15px;
 	display: inline-block;
 }
+.active
+{
+	color:#25aae1;
+}
+.pad
+{
+	height:10%;
+}
+.switch
+{
+	width:50px;
+	height:50px;
+	float:right;
+	top:20px;
+	right:20px;
+	position:absolute;
+	
+}
+
+.tabMenu
+{
+	height:100%;
+	text-align:center;
+	color:#ccc;
+	
+}
+.tabs 
+{
+	display:inline-block;
+	background-color:#333;
+	height:100%;
+	float:left;
+	width:14%;
+	border-right:#222;
+	border-right-style:solid;
+	border-right-width:1px;
+}
+.activeTab
+{
+	background:#999;
+}
+
+img.desaturate { filter: grayscale(100%); }
+img.desaturate { -webkit-filter: grayscale(100%); filter: grayscale(100%); }
+.button:hover
+{
+	background:#222;
+}
 .icon
 {
 	max-width:100%;
@@ -56,7 +104,7 @@ body
 }
 .buttonText
 {
-	float: left;
+	float: right;
     height: 100%;
     display: table;
 }
@@ -68,9 +116,44 @@ body
 #canvas
 {
 	height: 85%;
+	background-color:#222;
 }
 canvas
 {
+	
 	height: 90%;
 	width: 100%;
+	top:150;
+}
+.loading
+{
+	height: 85%;
+	background-color:rgba(192,192,192,0.3);
+	width: 100%;
+	display:none;
+	position:absolute;
+	}
+#tooltip
+{
+	height:15%;
+	width:200px;
+	background:#CCC;
+	color:#FFF;
+	position:absolute;
+}
+
+
+@media (max-width: 520px) {
+.buttonContainers
+{
+	min-width:50px;
+  }
+ .buttonText
+{
+    display: none;
+}
+.button
+{
+	width:50px;}
+  
 }
