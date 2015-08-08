@@ -16,9 +16,17 @@ var ohlcData;
 var screenData=[];
 var selectedScale = '30min';
 
+var tooltip;
+var chartMask;
+var heightDisplacement;
+var scrollDisplacment;
+
 canvas.addEventListener('click', function(evt) {
-		mousePos = getMousePos(canvas, evt);
-	 	showTooltip(mousePos, 3);
+		mousePos = {
+          x: evt.clientX,
+          y: evt.clientY
+        };
+	 	showTooltip(mousePos, 5);
     }, false);
 
 canvas.addEventListener('touchstart', function(evt) {
@@ -29,47 +37,57 @@ canvas.addEventListener('touchstart', function(evt) {
 	    evt.preventDefault();
 	}, false);
 
-function showTooltip(pos, radius){
-		
-        var mouseX=pos.x;
-        var mouseY=pos.y;
-        // var message =  mouseX+ ',' + mouseY;
-        found = false;     
-        for (var i = 0; i < screenData.length; i++) 
+function checkLine(pos, radius)
+{
+	var mouseX=pos.x;
+    var mouseY=pos.y;
+	for (var i = 0; i < screenData.length; i++) 
         {
         	var point = screenData[i];
-        	var dx = mouseX - point["x"]/scale;
-        	var dy = mouseY - point["y"][3]/scale;
+        	var dx = mouseX - scrollDisplacment - point["x"]/scale ;
+        	var dy = mouseY - heightDisplacement - point["y"][3]/scale ;
         	if (dx * dx + dy * dy < radius*radius)
         	{
-        		writeMessage(i);
         		found = true;
-        		break;
+        		return found,i;
         	}
-
-
     	}
-    	if (!found) 
-    		document.getElementById("tooltip").innerHTML='';
+}
+function showTooltip(pos, radius){
+        // var message =  mouseX+ ',' + mouseY;
+        found = false; 
+        if (chartType='line')
+        	found,i=checkLine(pos, radius);
+        else if (chartType='bar')
+        	found=false
+
+        if(found)
+        	writeMessage(i, pos);
+    	else
+    		tooltip.style.display='none';
 }
 
-function getMousePos(canvas, evt) {
-        var rect = canvas.getBoundingClientRect();
-        return {
-          x: evt.clientX - rect.left,
-          y: evt.clientY - rect.top
-        };
-}
-
-function writeMessage(index) {
-		var tooltipSpan = document.getElementById('tooltip');
+function writeMessage(index, pos) {
 		var x=index+1
 		var y=Math.round(ohlcData[keys[x]][3],2)
-		message = keys[x] + ',' + y;
-        document.getElementById("tooltip").innerHTML=message;
-        tooltipSpan.style.top = (y + 20) + 'px';
-    	tooltipSpan.style.left = (index+1 + 20) + 'px';
+        
+        document.getElementById('label').innerHTML= keys[x];
+        document.getElementById('open').innerHTML=Math.round(ohlcData[keys[x]][0],2);
+        document.getElementById('high').innerHTML=Math.round(ohlcData[keys[x]][1],2);
+        document.getElementById('low').innerHTML=Math.round(ohlcData[keys[x]][2],2);
+        document.getElementById('close').innerHTML=Math.round(ohlcData[keys[x]][3],2);
+        
+    	tooltip.style.display = 'block';
+        if (chartMask.clientHeight-pos.y<tooltip.clientHeight)
+        	tooltip.style.top = (pos.y-tooltip.clientHeight-10)+ 'px';
+        else
+        	tooltip.style.top = (pos.y+10)+ 'px';
+        if ( chartMask.clientWidth - pos.x < tooltip.clientWidth )
+        	tooltip.style.left = (pos.x-tooltip.clientWidth-10) + 'px';
+    	else
+    		tooltip.style.left = (pos.x+10) + 'px';
 }
+
 function switchLights()
 {
 	console.log("ChangingLights");
@@ -127,7 +145,7 @@ function getData()
 	var date = new Date();
 	console.log(date.toISOString());
 
-	urlParams = 'date='+ date.toString() +'&scale='+selectedScale+'&count=' + 2*plottablePoints ;
+	urlParams = 'date='+ date.toString() +'&scale='+selectedScale+'&count=' + 3*plottablePoints ;
 	xhr.send( urlParams );
 
 	return randomResults;
@@ -138,11 +156,21 @@ function redraw(e)
 	canvas.width = scale*canvas.clientWidth;
 	canvas.height = scale*canvas.clientHeight;
 	plottablePoints = (((((canvas.width-axesPadding-smallPadding)/xLabelSeparation)+ 0.5) << 1) >> 1);
+ 	
+ 	chartMask = document.getElementById('canvasMask');
+
+ 	scrollDisplacment = -2 * document.getElementById('largeCanvas').clientWidth/3;
+	document.getElementById('largeCanvas').style.left = scrollDisplacment + 'px';
+	chartArea=document.getElementById('chartArea').getBoundingClientRect()
+	
+	heightDisplacement = document.getElementById('chartArea').getBoundingClientRect().top		
+
 	document.getElementById(chartType).click();
 }
 
 function drawChart(el)
 {
+	tooltip.style.display = 'none';
 	chartType = el.currentTarget.id;
 	
 	prevActive = document.getElementsByClassName('active')[0];
@@ -373,6 +401,7 @@ function setup()
 		tabs[i].addEventListener("click",changeScale);
 
 	window.addEventListener("resize",redraw);
+	tooltip = document.getElementById('tooltip');
 
 	chartType = "line";
 	redraw(null);

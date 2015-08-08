@@ -183,14 +183,33 @@ img.desaturate { -webkit-filter: grayscale(100%); filter: grayscale(100%); }
 }
 #tooltip
 {
-	height:15%;
+	height:30%;
 	width:200px;
 	background:#CCC;
 	color:#FFF;
-	position:absolute;
+	position: fixed;
 	display: none;
 }
+#label
+{
 
+}
+#open
+{
+
+}
+#close
+{
+
+}
+#high
+{
+
+}
+#low
+{
+
+}
 @media (max-width: 520px) {
 .buttonContainers
 {
@@ -200,8 +219,13 @@ img.desaturate { -webkit-filter: grayscale(100%); filter: grayscale(100%); }
 {
     display: none;
 }
+.icon
+{
+	float:none;
+}
 .button
 {
-	width:50px;}
+	width:40px;
+}
   
 }
