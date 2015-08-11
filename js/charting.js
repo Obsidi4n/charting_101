@@ -13,7 +13,7 @@ var offset = scale*3;
 var overflow = scale*5;
 
 var ohlcData;
-var screenData=[];
+var screenData={};
 var selectedScale = '30min';
 
 var tooltip;
@@ -37,39 +37,96 @@ canvas.addEventListener('touchstart', function(evt) {
 	    evt.preventDefault();
 	}, false);
 
+function getScreenX(pos)
+{
+ 	var screenX={};
+ 	screenX["clickedX"]=pos.x*2-2*scrollDisplacment;
+ 	var modX=(screenX["clickedX"]-axesPadding)%xLabelSeparation;
+ 	if(modX<xLabelSeparation/2)
+ 		screenX["nearestX"]=screenX["clickedX"]-modX;
+ 	else
+ 		screenX["nearestX"]=screenX["clickedX"]+(xLabelSeparation-modX);
+ 	return screenX;
+ 	// for (var i=0;i<xLabelSeparation; i+=10)
+ 	// {
+ 	// 	pointX+=pointX+i
+ 	// 	if(screenData[pointX])
+ 	// 		return pointX-screenX;
+ 	// }
+} 
+
 function checkLine(pos, radius)
 {
 	var mouseX=pos.x;
-    var mouseY=pos.y;
-	for (var i = 0; i < screenData.length; i++) 
-        {
-        	var point = screenData[i];
-        	var dx = mouseX - scrollDisplacment - point["x"]/scale ;
-        	var dy = mouseY - heightDisplacement - point["y"][3]/scale ;
-        	if (dx * dx + dy * dy < radius*radius)
+	var mouseY=pos.y;
+	var screenX=getScreenX(pos);
+	var dx=screenX["nearestX"]-screenX["clickedX"];
+	var dy=mouseY - heightDisplacement - screenData[screenX["nearestX"]][3]/scale;
+	if (dx * dx + dy * dy < radius*radius)
         	{
         		found = true;
-        		return found,i;
+        		return found,screenX["nearestX"];
         	}
-    	}
+    //var screenKeys=Object.keys(screenData);
+	// for (var i = 0; i < screenKeys.length; i++) 
+ //        {
+ //        	var point = screenData[screenKeys[i]];
+ //        	var dx = mouseX - scrollDisplacment - screenKeys[i]/scale ;
+ //        	var dy = mouseY - heightDisplacement - point[3]/scale ;
+ //        	if (dx * dx + dy * dy < radius*radius)
+ //        	{
+ //        		found = true;
+ //        		return found,i;
+ //        	}
+ //    	}
+}
+
+function checkBar(pos)
+{
+	var mouseX=pos.x;
+	var mouseY=pos.y-heightDisplacement;
+	var screenX=getScreenX(pos);
+	var dx=screenX['nearestX']-screenX['clickedX'];
+
+	if(dx>=-5 && dx<=5 && mouseY>=screenData[screenX['nearestX']][1]/scale && mouseY<=screenData[screenX['nearestX']][2]/scale)
+	{
+		found = true;
+		return found, screenX["nearestX"];
+	}
+}
+
+function checkCandle(pos)
+{
+	var mouseX=pos.x;
+	var mouseY=pos.y-heightDisplacement;
+	var screenX=getScreenX(pos);
+	var dx=screenX['nearestX']-screenX['clickedX'];
+	if(dx>=-7 && dx<=7 && mouseY>=screenData[screenX['nearestX']][1]/scale && mouseY<=screenData[screenX['nearestX']][2]/scale)
+	{
+		found = true;
+		return found, screenX["nearestX"];
+	}
+
+
 }
 function showTooltip(pos, radius){
         // var message =  mouseX+ ',' + mouseY;
         found = false; 
-        if (chartType='line')
-        	found,i=checkLine(pos, radius);
-        else if (chartType='bar')
-        	found=false
-
+        if (chartType=='line')
+        	found,index=checkLine(pos, radius);
+        else if (chartType=='bar')
+        	found,index=checkBar(pos);
+        else if(chartType=='candlestick')
+        	found,index=checkCandle(pos);
         if(found)
-        	writeMessage(i, pos);
+        	writeMessage(index, pos);
     	else
     		tooltip.style.display='none';
 }
 
-function writeMessage(index, pos) {
-		var x=index+1
-		var y=Math.round(ohlcData[keys[x]][3],2)
+function writeMessage(screenX, pos) {
+		var x=Math.round((canvas.width-screenX-axesPadding+smallPadding)/xLabelSeparation);
+		var y=Math.round(ohlcData[keys[x]][3],2);
         
         document.getElementById('label').innerHTML= keys[x];
         document.getElementById('open').innerHTML=Math.round(ohlcData[keys[x]][0],2);
@@ -220,13 +277,13 @@ function draw()
 		for(var j=0; j<4 ; j++)
 			scaledY.push(canvas.height-axesPadding-(ohlcData[key][j]/yfactor));
 		p["y"] = scaledY;
+		screenData[xcoord]=scaledY;
 		if( chartType==='line' && ohlcData[keys[i-1]])
 		{
 			var p1 = {};
 			p1["x"] = xcoord+xLabelSeparation;
 			p1["y"] = canvas.height-axesPadding-(ohlcData[keys[i-1]][3]/yfactor);
 			drawLine(p, p1, axesPadding);
-			screenData.push(p);
 			drawCricle(p);
 		}
 		else if (i>0)
@@ -318,7 +375,7 @@ function drawBar(point, axesPadding, xLabelSeparation)
 
 function drawBarcandle(point, overflow)
 {
-	var width =1;
+	//var width =4;
 	var x = point["x"];
 	var open  = point["y"][0];
 	var high  = point["y"][1];
