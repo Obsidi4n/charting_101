@@ -232,8 +232,141 @@
     	this.checkDataRange = function(){
 
     	};
-    	this.draw();
-    };       
+    };
+	Alice.prototype.Bar=function(data)
+    	{
+	    	console.log('Bar');
+	    	this.draw = function(){
+	    		if(this.Data && Object.keys(this.Data).length>1)
+	    		{
+		    		var keys = Object.keys(this.Data);
+		    		var points = this.globals.plottablePoints;
+
+		    		var yAxisPadding = this.globals.scale * this.globals.yAxisPadding;
+					var xAxisPadding = this.globals.scale * this.globals.xAxisPadding;
+
+		    		var xStart = this.canvas.width - yAxisPadding;
+		    		var separation = this.globals.scale * this.globals.xLabelSeparation;
+
+				    var dataLimits= this.globals.globalHigh - this.globals.globalLow;
+				    var displayLimits = this.canvas.height - xAxisPadding;
+				    var yfactor=dataLimits/displayLimits;
+				    
+				    ctx.lineWidth = this.globals.scale*1;
+
+				    //local variables 
+				    var overflow=10;
+				    var open, close, high, low, x;
+
+					for (var i=0; i<points && i<keys.length-1; i++)
+					{
+						var xcoord = xStart-i*separation;
+				
+						var p = {};
+						p["x"] = xcoord;
+						p["y"] = [];
+						for(var j=0; j<4; j++)
+						{
+							p["y"][j] = ((((this.canvas.height-xAxisPadding-(this.Data[keys[i]][j]/yfactor)) + 0.5) <<1) >>1);
+						}
+						this.ScreenCoords.push(p);
+						x = p["x"];
+						open  = p["y"][0];
+						high  = p["y"][1];
+						low   = p["y"][2];
+						close = p["y"][3];
+						if(close<=open)  
+						{
+							ctx.strokeStyle = '#6699FF';
+							ctx.fillStyle = "#6699FF";	
+						}				//Reversed operator since open and close are now coordinates from top 
+							
+						else{
+							ctx.strokeStyle = "#FF3366";
+							ctx.fillStyle = '#FF3366';
+						}
+						ctx.beginPath();
+						ctx.moveTo(x,high);
+						ctx.lineTo(x,low);
+						ctx.stroke();
+						ctx.moveTo(x,open);
+						ctx.lineTo(x-overflow,open);
+						ctx.stroke();
+						ctx.moveTo(x,close);
+						ctx.lineTo(x+overflow,close);
+						ctx.stroke();
+					}
+				}
+			};
+			if(data)
+    		this.setData(data);
+
+	    	if(this.Data)
+	    		this.draw();
+    	};     	
+
+Alice.prototype.CandleStick=function(data)
+    	{
+	    	console.log('CandleStick');
+	    	this.draw = function(){
+	    		if(this.Data && Object.keys(this.Data).length>1)
+	    		{
+		    		var keys = Object.keys(this.Data);
+		    		var points = this.globals.plottablePoints;
+
+		    		var yAxisPadding = this.globals.scale * this.globals.yAxisPadding;
+					var xAxisPadding = this.globals.scale * this.globals.xAxisPadding;
+
+		    		var xStart = this.canvas.width - yAxisPadding;
+		    		var separation = this.globals.scale * this.globals.xLabelSeparation;
+
+				    var dataLimits= this.globals.globalHigh - this.globals.globalLow;
+				    var displayLimits = this.canvas.height - xAxisPadding;
+				    var yfactor=dataLimits/displayLimits;
+				   
+				    ctx.lineWidth = this.globals.scale*1;
+				    ctx.strokeStyle = "#333";
+				    
+				    var width = separation/3;
+					var open, close, high, low, x;
+
+					for (var i=0; i<points && i<keys.length-1; i++)
+					{
+						var xcoord = xStart-i*separation;
+				
+						var p = {};
+						p["x"] = xcoord;
+						p["y"] = [];
+						for(var j=0; j<4; j++)
+							p["y"][j] = ((((this.canvas.height-xAxisPadding-(this.Data[keys[i]][j]/yfactor)) + 0.5) <<1) >>1);
+						this.ScreenCoords.push(p);
+						
+						x = p["x"];
+						open  = p["y"][0];
+						high  = p["y"][1];
+						low   = p["y"][2];
+						close = p["y"][3];
+						if(close<=open)  				//Reversed operator since open and close are now coordinates from top 
+							ctx.fillStyle = "#6699FF";
+						else
+							ctx.fillStyle = "#FF3366";
+						
+						ctx.beginPath();
+						ctx.moveTo(x,high);
+						ctx.lineTo(x,low);
+						ctx.stroke();
+						ctx.closePath();
+
+						ctx.fillRect(x-width/2, open, width, close-open);
+					}
+				}
+			};
+			if(data)
+    		this.setData(data);
+
+	    	if(this.Data)
+	    		this.draw();
+    	};    
 
     window.Alice = Alice;
 }).call(this);
