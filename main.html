@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="utf-8" name="viewport" content="initial-scale=1, maximum-scale=1">
+	<!--<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/1.0.2/Chart.min.js"></script>-->
+	<link type="text/css" rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div id="chartControls">
+	<div id="topBar">
+		<div id="15min" class="tabs activeTab">15min</div>
+		<div id="30min" class="tabs">30min</div>
+		<div id="1hour" class="tabs">1hour</div>
+		<div id="4hours" class="tabs">4hours</div>
+		<div id="1day" class="tabs">1day</div>
+		<div id="1week" class="tabs">1week</div>
+		<div class="tabs">
+			<div class="table">
+				<div class="middleCell">
+					<img class="desaturate" src="img/activebulbsmall.png"/>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div id="chartArea">
+		<div id="tooltip">
+			<div id="label"></div>
+			<div id="open"></div>
+			<div id="high"></div>
+			<div id="low"></div>
+			<div id="close"></div>
+		</div>
+		<div id="loading" class="fill table" align="center">
+			<div class="middleCell">
+				<img class="desaturate" src="img/activebulbsmall.png"/>
+				<div class="loader">Loading...</div>
+			</div>
+		</div>
+		<div id="canvasMask" class="fill">
+			<div id="largeCanvas">
+				<canvas id="canvas" class="fill"></canvas>
+			</div>
+		</div>
+	</div>
+</div>
+<div id="buttonBar" align="center">
+	<div class="buttonContainers">	
+		<div class="button active" id="line">
+			<img class="icon" src="img/lineChartIcon.png">
+			<div class="buttonText">
+				<span>Line</span>
+			</div>
+		</div>
+	</div>
+	<div class="buttonContainers">
+		<div class="button" id="bar">
+			<img class="icon" src="img/barCartIcon.png">
+			<div class="buttonText">
+				<span>Bar</span>
+			</div>
+		</div>
+	</div>
+	<div class="buttonContainers">
+		<div class="button" id="candlestick">
+			<img class="icon" src="img/candleStickChartIcon.png">
+			<div class="buttonText">
+				<span>Candlestick</span>
+			</div>
+		</div>
+	</div>
+</div>
+
+<script type="text/javascript" src="js/alice.js"></script>
+<script type="text/javascript">
+	var ctx = document.getElementById('canvas').getContext('2d');
+	var respData;
+	var getData =function(){
+		var xhr = new XMLHttpRequest()
+		xhr.open('POST', '/dataSource');
+		xhr.setRequestHeader('content-type','application/x-www-form-urlencoded');
+		xhr.onreadystatechange = function (e) {
+			if (xhr.readyState==4 && xhr.status==200)
+			{
+				respData = JSON.parse(this.response);
+				console.log('Data received', Object.keys(respData).length);
+
+				
+			}
+		};
+		var date = new Date();
+		console.log(date.toISOString());
+
+		urlParams = 'date='+ date.toString() +'&scale=15min&count='+3*a.globals.plottablePoints ;
+		xhr.send( urlParams );
+	}
+
+	function drawLine()
+	{
+		var lineData = {};
+		var keys = Object.keys(respData);
+		for(var i=0; i<keys.length;i++)
+		{
+			var key = keys[i];
+			lineData[key] = respData[key][3];
+		}
+		a.setData(lineData);
+		a.drawGrids();
+		a.drawLabels();
+
+		a.Line();
+	}
+
+	a = new Alice(ctx);
+	getData();
+</script>
+</body>
+</html>
