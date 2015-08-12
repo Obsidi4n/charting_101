@@ -8,33 +8,51 @@
 </head>
 <body>
 <div id="chartControls">
-	<div id="topBar">
-		<div id="15min" class="tabs activeTab">15min</div>
-		<div id="30min" class="tabs">30min</div>
-		<div id="1hour" class="tabs">1hour</div>
-		<div id="4hours" class="tabs">4hours</div>
-		<div id="1day" class="tabs">1day</div>
-		<div id="1week" class="tabs">1week</div>
-		<div class="tabs">
-			<div class="table">
-				<div class="middleCell">
-					<img class="desaturate" src="img/activebulbsmall.png"/>
-				</div>
-			</div>
+    <div class="topWhole">	
+        <div id="topBar" align="center">
+            <div id="15min" class="tabs activeTab"><div class="table"><div class="middleCell">15min</div></div></div>
+            <div id="30min" class="tabs"><div class="table"><div class="middleCell">30min</div></div></div>
+            <div id="1hour" class="tabs"><div class="table"><div class="middleCell">1hour</div></div></div>
+            <div id="4hours" class="tabs"><div class="table"><div class="middleCell">4hours</div></div></div>
+            <div id="1day" class="tabs"><div class="table"><div class="middleCell">1day</div></div></div>
+            <div id="1week" class="tabs"><div class="table"><div class="middleCell">1week</div></div></div>
+        </div>
+		<div id="scaleButton">
+            <div  class="scaleButtonContainer">
+                <div style="float:left">
+                    <img src="img/scaleIcon.png" width="20px" height"20px" />
+                </div>
+                <div onClick="drop()" id="cunt" >
+                	15min
+                </div>
+            </div>
+            <div id="scaleItems">
+                  <div id="15m" class="activeScale scale">15min</div>
+                  <div id="30m" class="scale">30min</div>
+                  <div id="1h" class="scale">1hour</div>
+                  <div id="4h" class="scale">4hours</div>
+                  <div id="1d" class="scale">1day</div>
+                  <div id="1w" class="scale">1week</div>
+            </div>
 		</div>
-	</div>
+        <div id="switch" class="table" align="center">
+            <div class="middleCell">
+                <img class="desaturate" src="img/activebulbsmall.png"/>
+            </div>
+        </div>
+    </div>
+	
 	<div id="chartArea">
 		<div id="tooltip">
 			<div id="label"></div>
-			<div id="open"></div>
-			<div id="high"></div>
-			<div id="low"></div>
-			<div id="close"></div>
+			<div id="openContainer"><div style="font-size:0.8em; width:20%;height:100%;float:left;">Open</div><div id="open" align="center"></div></div>
+			<div id="highContainer"><div style="font-size:0.8em; width:20%;height:100%;float:left;">High</div><div id="high" align="center"></div></div>
+			<div id="lowContainer"><div style="font-size:0.8em; width:20%;height:100%;float:left;">Low</div><div id="low" align="center"></div></div>
+			<div id="closeContainer"><div style="font-size:0.8em; width:20%;height:100%;float:left;">Close</div><div id="close" align="center"></div></div>
 		</div>
 		<div id="loading" class="fill table" align="center">
 			<div class="middleCell">
-				<img class="desaturate" src="img/activebulbsmall.png"/>
-				<div class="loader">Loading...</div>
+				<img src="img/716.gif" width="10%" height="10%"/>
 			</div>
 		</div>
 		<div id="canvasMask" class="fill">

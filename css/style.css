@@ -12,6 +12,7 @@ html,body
 {
 	padding:0px;
 	height:100%;
+	
 }
 body
 {  
@@ -20,16 +21,44 @@ body
 	font-family:'Open Sans', Helvetica, Arial, sans-serif;
 	font-weight:400;
 	font-size:1.05em;
+	overflow:hidden;
+}
+.table
+{
+	display: table;
+	height: 100%;
+    width: 100%;
+}
+.middleCell
+{
+	display: table-cell;
+	vertical-align: middle;
 }
 #chartControls
 {
 	height: 90%;
 	width: 100%;
+	background:#222;
 }
 #topBar
 {
+	height:100%;
+	width: 90%;
+}
+#switch
+{
+	width:50px;
+	height:50px;
+	float:right;
+top:10px;
+right:20px;
+	position:absolute;
+	z-index:1;
+}
+.topWhole
+{
+	width:100%;
 	height:15%;
-	width: 100%;
 }
 #chartArea
 {
@@ -68,19 +97,13 @@ body
 
 #loading
 {
-	display: none;
+	background-color:rgba(100,100,100,1);
+	display:none;
 }
-.table
-{
-	display: table;
-	height: 100%;
-    width: 100%;
-}
-.middleCell
-{
-	display: table-cell;
-	vertical-align: middle;
-}
+
+
+
+
 .buttonContainers
 {
 	min-width: 150px;
@@ -97,7 +120,7 @@ body
 	color: #CCC;
 	border: none;
 	font-weight: bold;
-	font-size: 14px;
+	font-size: 0.9em;
 	cursor: pointer;
 	padding: 0 15px;
 	display: inline-block;
@@ -106,42 +129,68 @@ body
 {
 	color:#25aae1;
 }
-.switch
+
+#scaleButton
 {
-	width:50px;
-	height:50px;
-	float:right;
-	top:20px;
-	right:20px;
+	display:none;
 	position:absolute;
+	top:20px;
+	left:10px;
+	z-index:1000;
 }
-.tabMenu
+.scaleButtonContainer {
+    padding:15px;
+    border-radius:5px;
+    width:70px;
+    margin: 0;
+    border-width:1px;
+    border-style:solid;
+    border-color:#000;
+    background: #444;
+    text-align:center;
+    color:#fff;
+    -webkit-appearance:none;
+    -moz-appearance:none;
+    appearance:none;
+    cursor:pointer;
+}
+
+.scale {
+    padding:15px;
+    width:70px;
+    margin-left:1px;
+    border-bottom:1px solid #222;
+    background: #444;
+    text-align:center;
+    color:#fff;
+    -webkit-appearance:none;
+    -moz-appearance:none;
+    appearance:none;
+    cursor:pointer;
+}
+#scaleItems
 {
-	height:100%;
-	text-align:center;
-	color:#ccc;
+  margin-top:10px;
+  display:none;
 }
 .tabs 
 {
+	
 	display:inline-block;
 	background-color:#333;
 	height:99%;
 	float:left;
-	width:15%;
-	border-right:1px solid #222;
-	border-bottom: 1px solid #222;
+	width:16.5%;
+	margin-left:1px;
+	border-bottom: 5px inset #222;
 	transition: border-color 1s ease;
+	font-size:1em;
+	color:#eee;
+	text-align: center;
+	vertical-align: middle;
+	z-index:1000;
 }
-.tabs:last-child
-{
-	width: calc( 10% - 6px );
-    border-right: 0px;
-}
-.tabs:last-child img
-{
-	display: block;
-	margin: 0 auto;
-}
+
 .tabs:hover
 {
 	background-color:#444;
@@ -150,10 +199,14 @@ body
 .activeTab
 {
 	/*background:#999;*/
-	border-bottom: 1px solid #FFF;
-	height:99%;
+	border-bottom: 5px inset #6699ff;
+	height:95%;
 }
-
+.desaturate
+{
+	margin-top:10px;
+	margin-right:10px;
+}
 img.desaturate { filter: grayscale(100%); }
 img.desaturate { -webkit-filter: grayscale(100%); filter: grayscale(100%); }
 .button:hover
@@ -172,50 +225,62 @@ img.desaturate { -webkit-filter: grayscale(100%); filter: grayscale(100%); }
     height: 100%;
     display: table;
 }
+
 .buttonText span
 {
 	display: table-cell;
 	vertical-align: middle;
 }
-.loading
-{
-	background-color:rgba(192,192,192,0.3);
-}
+
 #tooltip
 {
-	height:30%;
+	height:auto;
 	width:200px;
-	background:#CCC;
 	color:#FFF;
-	position: fixed;
+	background:rgba(10,10,10,0.9);
+	position:absolute;
 	display: none;
+	border:#F88017;
+	border-style:solid;
+	border-width:2px;
+	border-radius:5px;
+	z-index:100;
+	
 }
 #label
 {
+	border-bottom:1px solid #659EC7;
+	padding:2%;
+	margin:3%;
+	text-align:center;
 
 }
-#open
+#openContainer,#closeContainer,#highContainer,#lowContainer
 {
-
+	width:44%;
+	min-width:70px;
+	float:right;
+	margin:1%;
+	font-size:0.7em;
+	border-bottom:1px solid #659EC7;
+	padding:2%;
+	
 }
-#close
-{
 
-}
-#high
+#open,#close,#low,#high 
 {
-
-}
-#low
-{
-
+	width:70%;
+	font-size:1.3em;
+	float:right;
+	overflow: hidden;
 }
 @media (max-width: 520px) {
 .buttonContainers
 {
 	min-width:50px;
   }
- .buttonText
+
+.buttonText
 {
     display: none;
 }
@@ -223,9 +288,40 @@ img.desaturate { -webkit-filter: grayscale(100%); filter: grayscale(100%); }
 {
 	float:none;
 }
+#topBar
+{
+	display:none;
+}
 .button
 {
 	width:40px;
 }
+#tooltip
+{
+	width:100px;
+}
+#label
+{
+	font-size:0.5em;
+}
+#open,#close,#low,#high 
+{
+	width:70%;
+	font-size:1em;
+	vertical-align:top;
+}
+#openContainer,#closeContainer,#highContainer,#lowContainer
+{
+	vertical-align:middle;
+	width:95%;
+	padding:1%;
+
+	
+}
+#scaleButton
+{
+	display:block;
+}
+
   
 }

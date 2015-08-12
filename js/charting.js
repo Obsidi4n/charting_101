@@ -466,3 +466,29 @@ function setup()
 	console.log("setup complete");
 }
 setup();
+
+
+/*
+<script type="text/javascript">
+
+function drop() {
+  if (document.getElementById("main").style.display == 'none') 
+    document.getElementById("main").style.display = 'block';
+  else
+    document.getElementById("main").style.display = 'none';
+}
+
+function changeScale(e)
+{
+  	id = e.srcElement.id;
+  	console.log(id);
+	document.getElementById("cunt").innerHTML=document.getElementById(id).innerHTML;
+  drop();
+}
+
+scales = document.querySelectorAll('.scale');
+for(i=0;i<scales.length;i++)
+	scales[i].addEventListener('click', changeScale);
+
+</script
+*/
