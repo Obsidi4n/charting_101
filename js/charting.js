@@ -454,7 +454,7 @@ function setup()
 		buttons[i].addEventListener("click",drawChart);
 
 	tabs = document.getElementsByClassName("tabs");
-	for (var i=0;i<tabs.length-1;i++)			//Ignore last tab
+	for (var i=0;i<tabs.length;i++)			//Ignore last tab
 		tabs[i].addEventListener("click",changeScale);
 
 	window.addEventListener("resize",redraw);
