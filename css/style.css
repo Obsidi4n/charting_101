@@ -151,7 +151,7 @@ body
 .scaleButtonContainer {
     padding:10px;
     border-radius:5px;
-    width:70px;
+	max-width:80px;
     margin: 0;
     border-width:1px;
     border-style:solid;
@@ -173,7 +173,7 @@ body
 
 .scale {
     padding:10px;
-    width:70px;
+    width:80px;
     margin-left:1px;
     border-bottom:1px solid #222;
     background: #444;
@@ -254,7 +254,7 @@ img.desaturate { -webkit-filter: grayscale(100%); filter: grayscale(100%); }
 	width:200px;
 	color:#FFF;
 	background:rgba(10,10,10,0.9);
-	position:absolute;
+	position:fixed;
 	display: none;
 	border:#F88017;
 	border-style:solid;
@@ -345,7 +345,18 @@ img.desaturate { -webkit-filter: grayscale(100%); filter: grayscale(100%); }
 {
 	display:block;
 }
-
+#switch
+{
+	left:auto;
+	right:40px;
+	top:5px;
+}
+#refresh
+{
+	left:auto;
+	right:10px;
+	top:5px;
+}
   
 }
 @media (max-height: 400px) {
@@ -385,7 +396,7 @@ img.desaturate { -webkit-filter: grayscale(100%); filter: grayscale(100%); }
 	font-size:0.8em;
     padding:5px;
     border-radius:3px;
-    width:50px;
+    width:60px;
 }
 .scaleButtonContainer img
 {
@@ -397,7 +408,7 @@ img.desaturate { -webkit-filter: grayscale(100%); filter: grayscale(100%); }
 	font-size:0.8em;
     padding:5px;
     border-radius:3px;
-    width:50px;
+    width:60px;
 }
 
 }
