@@ -141,13 +141,12 @@ width:30px;
 #scaleButton
 {
 	display:none;
-	position:absolute;
-	top:20px;
-	left:10px;
-	z-index:1000;
+	padding:10px;
+	z-index:1;
 }
+
 .scaleButtonContainer {
-    padding:15px;
+    padding:10px;
     border-radius:5px;
     width:70px;
     margin: 0;
@@ -163,8 +162,14 @@ width:30px;
     cursor:pointer;
 }
 
+.scaleButtonContainer img
+{
+	width:20px;
+	height:20px;
+}
+
 .scale {
-    padding:15px;
+    padding:10px;
     width:70px;
     margin-left:1px;
     border-bottom:1px solid #222;
@@ -369,6 +374,25 @@ img.desaturate { -webkit-filter: grayscale(100%); filter: grayscale(100%); }
 {
 	font-size:0.7em;
 	
+}
+.scaleButtonContainer 
+{
+	font-size:0.8em;
+    padding:5px;
+    border-radius:3px;
+    width:50px;
+}
+.scaleButtonContainer img
+{
+	width:15px;
+	height:15px;
+}
+.scale 
+{
+	font-size:0.8em;
+    padding:5px;
+    border-radius:3px;
+    width:50px;
 }
 
 }
