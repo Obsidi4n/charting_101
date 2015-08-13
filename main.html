@@ -73,8 +73,7 @@
 
 <script type="text/javascript" src="js/alice.js"></script>
 <script type="text/javascript">
-	var canvas = document.getElementById('canvas');
-	var ctx = canvas.getContext('2d');
+	var ctx = document.getElementById('canvas').getContext('2d');
 	var respData;
 	var getData =function(){
 		var xhr = new XMLHttpRequest()
@@ -86,7 +85,7 @@
 				respData = JSON.parse(this.response);
 				console.log('Data received', Object.keys(respData).length);
 
-				drawLine();
+				
 			}
 		};
 		var date = new Date();
@@ -105,25 +104,12 @@
 			var key = keys[i];
 			lineData[key] = respData[key][3];
 		}
-		// a.setData(lineData);
+		a.setData(lineData);
 		a.drawGrids();
-
-		a.Line(lineData);
 		a.drawLabels();
-	}
 
-	canvas.addEventListener('click', function(evt) {
-		mousePos = {
-          x: evt.clientX,
-          y: evt.clientY
-        };
-        var selected = a.checkClick(mousePos);
-        if (selected)
-        	console.log('Clicked point', selected);
-        else
-        	console.log('nothing clicked');
-	 	// showTooltip(mousePos, 5);
-    }, false);
+		a.Line();
+	}
 
 	a = new Alice(ctx);
 	getData();
