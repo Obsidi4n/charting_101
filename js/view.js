@@ -3,6 +3,8 @@ var socket = io();
 
 var canvas = document.getElementById('canvas');
 var ctx = canvas.getContext('2d');
+var tooltip = document.getElementById('tooltip'); 
+
 var respData;
 var getData =function(){
 	document.getElementById('loading').style.opacity = 1;
@@ -55,18 +57,51 @@ function drawChart(el)
 		a.CandleStick();
 }
 
+function showToolTip(selected, mousePos)
+{   
+    document.getElementById('label').innerHTML = selected.x;
+    document.getElementById('open').innerHTML  = selected.y[0];
+    document.getElementById('high').innerHTML  = selected.y[1];
+    document.getElementById('low').innerHTML   = selected.y[2];
+    document.getElementById('close').innerHTML = selected.y[3];
+    
+    var limits = canvas.getBoundingClientRect();
+	tooltip.style.display = 'block';
+    if (limits.bottom-mousePos.y<tooltip.clientHeight)
+    	tooltip.style.top = mousePos.y - tooltip.clientHeight + 'px';
+    else
+    	tooltip.style.top = mousePos.y + 2 + 'px';
+    if ( limits.right - mousePos.x < tooltip.clientWidth )
+    	tooltip.style.left = mousePos.x - tooltip.clientWidth - 2 + 'px';
+	else
+		tooltip.style.left = mousePos.x + 2 + 'px';
+}
 canvas.addEventListener('click', function(evt) {
 	mousePos = {
       x: evt.clientX,
       y: evt.clientY
     };
-    var selected = a.checkClick(mousePos);
-    if (selected)
-    	console.log('Clicked point', selected);
+    var index = a.checkClick(mousePos);
+    if (index.constructor != Boolean)
+    {	
+    	var selected = {};
+    	selected.x = Object.keys(respData)[index];
+        selected.y = respData[Object.keys(respData)[index]];
+        for(var i =0; i<4; i++)
+        	selected.y[i] = Math.round(selected.y[i]);
+    	showToolTip(selected, mousePos);
+    	console.log('Clicked point', index);
+    }
     else
+    {
+    	tooltip.style.display = 'none';
     	console.log('nothing clicked');
+    }
  	// showTooltip(mousePos, 5);
 }, false);
+
+a = new Alice(ctx);
+getData();
 
 socket.on('realtime', function(data){
 	console.log(data);

@@ -37,7 +37,10 @@
 		startIndex: 0,
 
 		labelsDrawn: true,
-		gridsDrawn: true
+		gridsDrawn: true,
+		barWidth: 0,
+		lineWidth: 0,
+		candleWidth: 0,
 	};
 	
 	Alice.prototype.Data = [],
@@ -300,6 +303,7 @@
 
     Alice.prototype.Line = function(data){
     	this.chartType = 'Line';
+    	this.lineWidth = this.globals.scale*1;
     	this.draw = function(){
     		if(this.Data && Object.keys(this.Data).length>1)
     		{
@@ -317,7 +321,7 @@
 
 			    var virtualPixelConversion=this.globals.virtualPixelConversion;
 
-			    ctx.lineWidth = this.globals.scale*1;
+			    ctx.lineWidth = this.lineWidth;
 				ctx.strokeStyle = '#6699FF';
 				ctx.fillStyle = '#6699FF';
 				var radius=6;
@@ -391,12 +395,7 @@
         	var dx = x - closestPoint.x ;
         	var dy = y - closestPoint.y ;
         	if (dx * dx + dy * dy < clickRadius*clickRadius)
-        	{
-        		var retData = {};
-        		var key = Object.keys(this.Data)[this.globals.startIndex + closestIndex];
-        		retData[key] = this.Data[key];
-        		return retData;
-        	}
+        		return this.globals.startIndex + closestIndex;
 	    	return false;
     	};
 
@@ -410,6 +409,7 @@
 	Alice.prototype.Bar=function(data)
     	{
 	    	this.chartType = 'Bar';
+
 	    	this.draw = function(){
 	    		if(this.Data && Object.keys(this.Data).length>1)
 	    		{
@@ -485,7 +485,19 @@
 	    		var yDisplacement = this.canvas.getBoundingClientRect().top	;
 	    		var virtualPixelConversion = this.globals.virtualPixelConversion;
 
-	    	};
+	    		var x = (position.x-xDisplacement) * this.globals.scale;
+	    		var y = (position.y-yDisplacement) * this.globals.scale;
+	    		
+	    		var clickRadius = this.globals.scale * this.globals.clickRadius;
+	        	var closestIndex = this.getClosestLabel(x);
+	        	var closestPoint = this.ScreenCoords[closestIndex];
+
+	        	var dx = x - closestPoint.x ;
+	        	
+	        	if (dx >= -7 && dx <= 7 && y >= closestPoint.y[1] && y <= closestPoint.y[2])
+	        		return this.globals.startIndex + closestIndex;
+	        	return false;
+	        };
 
 			if(data)
     			this.setData(data);
@@ -497,6 +509,7 @@
 Alice.prototype.CandleStick=function(data)
     	{
 	    	this.chartType = 'CandleStick';
+	    	this.barWidth = 0;
 	    	this.draw = function(){
 	    		if(this.Data && Object.keys(this.Data).length>1)
 	    		{
@@ -518,12 +531,12 @@ Alice.prototype.CandleStick=function(data)
 				    ctx.lineWidth = this.globals.scale*1;
 				    ctx.strokeStyle = "#999";
 				    
-				    var width = separation/3;
+				    this.barWidth = separation/3;
 					var open, close, high, low, x;
 
 					for (var i= startIndex; i<startIndex+points && i<keys.length-1; i++)
 					{
-						var xcoord = xStart-(i-startIndex)*separation-width/2;
+						var xcoord = xStart-(i-startIndex)*separation-this.barWidth/2;
 				
 						var p = {};
 						p["x"] = xcoord;
@@ -548,7 +561,7 @@ Alice.prototype.CandleStick=function(data)
 						ctx.stroke();
 						ctx.closePath();
 
-						ctx.fillRect(x-width/2, open, width, close-open);
+						ctx.fillRect(x-this.barWidth/2, open, this.barWidth, close-open);
 					}
 
 			    	if(this.globals.labelsDrawn)
@@ -560,6 +573,19 @@ Alice.prototype.CandleStick=function(data)
 	    		var xDisplacement = this.canvas.getBoundingClientRect().left;
 	    		var yDisplacement = this.canvas.getBoundingClientRect().top	;
 	    		var virtualPixelConversion = this.globals.virtualPixelConversion;
+
+	    		var x = (position.x-xDisplacement) * this.globals.scale;
+	    		var y = (position.y-yDisplacement) * this.globals.scale;
+	    		
+	    		var clickRadius = this.globals.scale * this.globals.clickRadius;
+	        	var closestIndex = this.getClosestLabel(x);
+	        	var closestPoint = this.ScreenCoords[closestIndex];
+
+	        	var dx = x - closestPoint.x ;
+	        	
+	        	if (dx >= -this.barWidth && dx <= this.barWidth && y >= closestPoint.y[1] && y <= closestPoint.y[2])
+	        		return this.globals.startIndex + closestIndex;
+		    	return false;
 
 	    	};
 
