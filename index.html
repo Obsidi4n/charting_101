@@ -37,29 +37,30 @@
 		</div>
         <div id="switch" class="table" align="center">
             <div class="middleCell">
-                <img class="desaturate" src="img/activebulbsmall.png"/>
+                <img class="desaturate" src="img/activebulbsmall.png" width="25" height="25"/>
             </div>
         </div>
+        <div id="refresh" class="table" align="center">
+            <div class="middleCell">
+                <img class="desaturate" src="img/refresh.png" width="25" height="25"/>
+            </div>
+        </div>        
     </div>
 	
 	<div id="chartArea">
 		<div id="tooltip">
 			<div id="label"></div>
-			<div id="openContainer"><div style="font-size:0.8em; width:20%;height:100%;float:left;">Open</div><div id="open" align="center"></div></div>
-			<div id="highContainer"><div style="font-size:0.8em; width:20%;height:100%;float:left;">High</div><div id="high" align="center"></div></div>
-			<div id="lowContainer"><div style="font-size:0.8em; width:20%;height:100%;float:left;">Low</div><div id="low" align="center"></div></div>
-			<div id="closeContainer"><div style="font-size:0.8em; width:20%;height:100%;float:left;">Close</div><div id="close" align="center"></div></div>
+			<div id="openContainer"><div class="ohlc">Open</div><div id="open" align="center"></div></div>
+			<div id="highContainer"><div class="ohlc">High</div><div id="high" align="center"></div></div>
+			<div id="lowContainer"><div class="ohlc">Low</div><div id="low" align="center"></div></div>
+			<div id="closeContainer"><div class="ohlc">Close</div><div id="close" align="center"></div></div>
 		</div>
 		<div id="loading" class="fill table" align="center">
 			<div class="middleCell">
 				<img src="img/716.gif" width="10%" height="10%"/>
 			</div>
 		</div>
-		<div id="canvasMask" class="fill">
-			<div id="largeCanvas">
 				<canvas id="canvas" class="fill"></canvas>
-			</div>
-		</div>
 	</div>
 </div>
 <div id="buttonBar" align="center">
