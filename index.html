@@ -3,36 +3,39 @@
 
 <head>
 	<meta charset="utf-8" name="viewport" content="initial-scale=1, maximum-scale=1">
-	<!--<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/1.0.2/Chart.min.js"></script>-->
+	<!--<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/1.0.2/Chart.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.3.6/socket.io.min.js"></script>-->
+	<script type="text/javascript" src="js/alice.js"></script>
+	<script src="js/socket.io.min.js"></script>
 	<link type="text/css" rel="stylesheet" href="css/style.css">
 </head>
 <body>
 <div id="chartControls">
     <div class="topWhole">	
         <div id="topBar" align="center">
-            <div id="15min" class="tabs activeTab"><div class="table"><div class="middleCell">15min</div></div></div>
-            <div id="30min" class="tabs"><div class="table"><div class="middleCell">30min</div></div></div>
-            <div id="1hour" class="tabs"><div class="table"><div class="middleCell">1hour</div></div></div>
-            <div id="4hours" class="tabs"><div class="table"><div class="middleCell">4hours</div></div></div>
-            <div id="1day" class="tabs"><div class="table"><div class="middleCell">1day</div></div></div>
-            <div id="1week" class="tabs"><div class="table"><div class="middleCell">1week</div></div></div>
+            <div id="15min" class="tab activeTab"><div class="table"><div class="middleCell">15min</div></div></div>
+            <div id="30min" class="tab"><div class="table"><div class="middleCell">30min</div></div></div>
+            <div id="1hour" class="tab"><div class="table"><div class="middleCell">1hour</div></div></div>
+            <div id="4hours" class="tab"><div class="table"><div class="middleCell">4hours</div></div></div>
+            <div id="1day" class="tab"><div class="table"><div class="middleCell">1day</div></div></div>
+            <div id="1week" class="tab"><div class="table"><div class="middleCell">1week</div></div></div>
         </div>
 		<div id="scaleButton">
-            <div  class="scaleButtonContainer">
+            <div onClick="drop()" class="scaleButtonContainer">
                 <div style="float:left">
                     <img src="img/scaleIcon.png" width="20px" height"20px" />
                 </div>
-                <div onClick="drop()" id="cunt" >
+                <div id="mainButton" >
                 	15min
                 </div>
             </div>
             <div id="scaleItems">
-                  <div id="15m" class="activeScale scale">15min</div>
-                  <div id="30m" class="scale">30min</div>
-                  <div id="1h" class="scale">1hour</div>
-                  <div id="4h" class="scale">4hours</div>
-                  <div id="1d" class="scale">1day</div>
-                  <div id="1w" class="scale">1week</div>
+                  <div id="15min" class="scale activeScale">15min</div>
+                  <div id="30min" class="scale">30min</div>
+                  <div id="1hour" class="scale">1hour</div>
+                  <div id="4hours" class="scale">4hours</div>
+                  <div id="1day" class="scale">1day</div>
+                  <div id="1week" class="scale">1week</div>
             </div>
 		</div>
         <div id="switch" class="table" align="center">
@@ -42,7 +45,7 @@
         </div>
         <div id="refresh" class="table" align="center">
             <div class="middleCell">
-                <img class="desaturate" src="img/refresh.png" width="25" height="25"/>
+                <img class="desaturate" onClick="getData()"  src="img/refresh.png" width="25" height="25"/>
             </div>
         </div>        
     </div>
@@ -57,7 +60,7 @@
 		</div>
 		<div id="loading" class="fill table" align="center">
 			<div class="middleCell">
-				<img src="img/716.gif" width="10%" height="10%"/>
+				<img src="img/716.gif"/>
 			</div>
 		</div>
 				<canvas id="canvas" class="fill"></canvas>
@@ -89,7 +92,6 @@
 		</div>
 	</div>
 </div>
-
-<script type="text/javascript" src="js/charting.js"></script>
+<script type="text/javascript" src="js/view.js"></script>
 </body>
 </html>

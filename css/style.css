@@ -22,6 +22,7 @@ body
 	font-weight:400;
 	font-size:1.05em;
 	overflow:hidden;
+	background-color: #222;
 }
 .table
 {
@@ -49,17 +50,15 @@ body
 {
 	width:30px;
 	height:30px;
-	float:right;
-	right:40px;
+	left:40px;
 	position:absolute;
 	z-index:1;
 }
 #refresh
 {
-width:30px;
+	width:30px;
 	height:30px;
-	float:right;
-	right:10px;
+	left:10px;
 	position:absolute;
 	z-index:1;
 }
@@ -105,12 +104,16 @@ width:30px;
 
 #loading
 {
-	background-color:rgba(100,100,100,1);
-	display:none;
+    background-color: rgba(100,100,100,0.9);
+    opacity: 0;
+    transition: opacity 1s ease;
 }
 
-
-
+#loading img
+{
+	width: 68px;
+	height: 25px;
+}
 
 .buttonContainers
 {
@@ -186,7 +189,7 @@ width:30px;
   margin-top:10px;
   display:none;
 }
-.tabs 
+.tab
 {
 	
 	display:inline-block;
@@ -195,23 +198,25 @@ width:30px;
 	float:left;
 	width:16.3%;
 	margin-left:1px;
-	border-bottom: 5px inset #222;
+	border-bottom: 5px inset #444;
 	transition: border-color 1s ease;
 	font-size:1em;
 	color:#eee;
 	z-index:1000;
 }
-
-.tabs:hover
+.tab:hover
 {
 	background-color:#444;
-	cursor: pointer;
 }
 .activeTab
 {
 	/*background:#999;*/
 	border-bottom: 5px inset #6699ff;
 	height:95%;
+}
+.tab, #refresh img, #switch img
+{
+	cursor: pointer;
 }
 .desaturate
 {

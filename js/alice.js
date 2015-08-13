@@ -43,8 +43,8 @@
 	Alice.prototype.Data = [],
 	Alice.prototype.ScreenCoords=[];
 
-	Alice.prototype.XLabels = [];
-	Alice.prototype.YLabels = [];
+	// Alice.prototype.XLabels = [];
+	// Alice.prototype.YLabels = [];
 
 	Alice.prototype.drawGrids = function(){
 
@@ -100,22 +100,24 @@
 
 			var ctx = this.context;	
 			ctx.font= fontSize +'px sans-serif';
-			while(ctx.measureText(this.XLabels[1]).width > skipPoints * separation)
+			var xLabels = Object.keys(this.Data);
+			while(ctx.measureText(xLabels[1]).width > skipPoints * separation)
 			{
 				fontSize-=1;
 				ctx.font= fontSize +'px sans-serif';
 			}
-			ctx.font= ((fontSize<<1)>>1) +'px sans-serif';
+			ctx.font= ((fontSize-2<<1)>>1) +'px sans-serif';
 			ctx.fillStyle = '#DDD';
 			ctx.textAlign = 'center';
 
 			for (var i = 0; i < this.globals.plottablePoints/skipPoints; i++) 
 			{
-				var label = this.XLabels[this.globals.startIndex+skipPoints*i];
+				var label = xLabels[this.globals.startIndex+skipPoints*i];
 				ctx.fillText(label, xStart-(i*skipPoints*separation), this.canvas.height-fontOffset);
 			}
 			console.log(i,' labels drawn on X-axis');
 
+			ctx.font= ((fontSize+2<<1)>>1) +'px sans-serif';
 			ctx.textAlign = 'left';
 			
 			var conversion = this.globals.virtualPixelConversion;
@@ -183,7 +185,7 @@
 			alice.globals.clickRadius = 10;
 			alice.globals.xAxisPadding = 15;
 			alice.globals.yAxisPadding = 30;
-			alice.globals.xLabelSeparation = 15;
+			alice.globals.xLabelSeparation = 20;
 			// alice.globals.plottablePoints = 25;
 		}
 		else
@@ -216,12 +218,10 @@
     		{
     			var value = data[keys[i]];
 
-    			this.XLabels.push(keys[i]);
+    			// this.XLabels.push(keys[i]);
 
     			if(value.constructor === Array)
     			{	
-    				if(i===0)
-    					this.YLabels.push(value[value.length-1]);
     				if(globalHigh<value[1])
 						globalHigh=value[1];
 					if(!globalLow)
@@ -231,8 +231,6 @@
     			}
     			else
     			{
-    				if(i===0)
-    					this.YLabels.push(value);
     				if(globalHigh<value)
 						globalHigh=value;
 					if(!globalLow)
