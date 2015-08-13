@@ -5,6 +5,13 @@ var router = express.Router();
 app = express();
 app.use(express.static(__dirname));
 
+
+var server = app.listen(7896);
+var io = require('socket.io').listen(server);
+
+var realtime, latestSentData;
+var globalLimit = 1000;
+
 router.use(bodyparser.urlencoded({ extended: true }));
 
 app.use('/', router); 
@@ -64,55 +71,11 @@ Date.prototype.deductTime = function (unit, measure) {
 		this.setDate(this.getDate()-7*unit);
 };
 
+
 Date.prototype.formatDate = function (measure) {
 	time = ("0"+this.getHours()).slice(-2) + ':' + ("0"+this.getMinutes()).slice(-2);
 	return time + ' ' + this.getDate() + ' ' + months[this.getMonth()] + ' ' + this.getFullYear();
 };
-
-router.post('/dataSource',function(req,res){
-	console.log('Generating data');
-	console.log(req.body['date']);
-
-	var date = new Date(req.body['date']);
-	var unit = req.body['scale'].replace(/\D/g, '');			//Replace all non-numerals with ''
-	var measure = req.body['scale'].replace(/[^a-z]/gi, '');	//Replace all non-alphabets with ''
-	var count = req.body['count'];
-
-	console.log('Units '+ unit);
-	console.log('Measure '+ measure);
-	console.log('Points to generate: '+count);
-
-	labelStamp = clipTimeToScale(date, unit, measure);
-	var data = {};
-	var close = Math.random() * 1000;
-	// globalHighest = 0;
-	// globalLow = null;
-	for(var i=0;i<count;i++)
-	{
-		high = close + Math.random() * (1000-close);  //Random number greater than close
-		low = close - Math.random() * close;   		//Random number lesser than open
-		open = low + Math.random() * (high-low) ;	//Random number between high and low
-
-		var values = [open, high, low, close];
-		// setGlobals(values);
-		
-		if(i===0)
-			label = 'T';
-		else if (i===1)
-			label = labelStamp.formatDate(measure);
-		else
-		{
-			labelStamp.deductTime(unit, measure);
-			label = labelStamp.formatDate(measure);
-		}
-		// console.log(label);
-		data[label] = values;
-		close = open;
-	}
-	console.log(labelStamp);
-	console.log('Data length', Object.keys(data).length)
-	return res.json(data);;
-});
 
 function clipTimeToScale(date, unit, measure)
 {
@@ -166,5 +129,81 @@ function clipTimeToScale(date, unit, measure)
 	return date;
 }
 
-app.listen(7896);
-console.log("I'm ready, listening on 7896");
+router.post('/dataSource',function(req,res){
+	console.log('Generating data');
+	// console.log(req.body['date']);
+
+	var date = new Date(req.body['date']);
+	var unit = req.body['scale'].replace(/\D/g, '');			//Replace all non-numerals with ''
+	var measure = req.body['scale'].replace(/[^a-z]/gi, '');	//Replace all non-alphabets with ''
+	var count = req.body['count'];
+
+	// console.log('Units '+ unit);
+	// console.log('Measure '+ measure);
+	// console.log('Points to generate: '+count);
+
+	labelStamp = clipTimeToScale(date, unit, measure);
+	var data = {};
+	var close = Math.random() * 1000;
+	// globalHighest = 0;
+	// globalLow = null;
+	for(var i=0;i<count;i++)
+	{
+		high = close + Math.random() * (1000-close);  //Random number greater than close
+		low = close - Math.random() * close;   		//Random number lesser than open
+		open = low + Math.random() * (high-low) ;	//Random number between high and low
+
+		var values = [open, high, low, close];
+		// setGlobals(values);
+		
+		if(i===0)
+		{
+			latestSentData = values;
+			label = 'T';
+		}
+		else if (i===1)
+			label = labelStamp.formatDate(measure);
+		else
+		{
+			labelStamp.deductTime(unit, measure);
+			label = labelStamp.formatDate(measure);
+		}
+		// console.log(label);
+		data[label] = values;
+		close = open;
+	}
+	console.log(labelStamp);
+	console.log('Data length', Object.keys(data).length)
+	return res.json(data);;
+});
+
+function streamer(){ 
+	var newRate = Math.random() * 1000;
+	if(newRate > latestSentData[1])
+		latestSentData[1] = newRate;
+	else if (newRate < latestSentData[2])
+		latestSentData[2] = newRate;
+	latestSentData[3] = newRate;
+
+	console.log(latestSentData);
+	io.emit('realtime', {'T': latestSentData} );
+}
+
+router.get('/turnOnStream', function(req,res){
+	if (realtime && realtime._repeat)
+		clearInterval(realtime);
+	else
+		realtime = setInterval(streamer, 3000);
+	var response = 'Stream on: ' + realtime._repeat;
+	return res.send(response);
+});
+
+io.on('connection', function(socket){
+  console.log('Mazel tov! Someone connected');
+
+  socket.on('disconnect', function(){
+    console.log('Someone doesnt like their coffee black');
+  });
+});
+
+console.log("All cool! I'm ready and listening on 7896");
