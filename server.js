@@ -138,8 +138,7 @@ router.post('/dataSource',function(req,res){
 	var measure = req.body['scale'].replace(/[^a-z]/gi, '');	//Replace all non-alphabets with ''
 	var count = req.body['count'];
 
-	// console.log('Units '+ unit);
-	// console.log('Measure '+ measure);
+	console.log('Units '+ unit + '. Measure '+ measure);
 	// console.log('Points to generate: '+count);
 
 	labelStamp = clipTimeToScale(date, unit, measure);
@@ -173,7 +172,8 @@ router.post('/dataSource',function(req,res){
 		close = open;
 	}
 	console.log(labelStamp);
-	console.log('Data length', Object.keys(data).length)
+	console.log('Data length', Object.keys(data).length);
+
 	return res.json(data);;
 });
 
@@ -198,11 +198,14 @@ router.get('/turnOnStream', function(req,res){
 	return res.send(response);
 });
 
-io.on('connection', function(socket){
-  console.log('Mazel tov! Someone connected');
+var users = 0;
 
+io.on('connection', function(socket){
+	users++;
+  	console.log('Mazel tov! Someone connected. Users left: ', users);
   socket.on('disconnect', function(){
-    console.log('Someone doesnt like their coffee black');
+  	users--;
+    console.log('Someone doesnt like their coffee black. Users left: ', users);
   });
 });
 

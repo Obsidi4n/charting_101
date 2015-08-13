@@ -278,14 +278,22 @@
 	 	else
 	 		nearestPoint=invertedXCoord+modX;
 
-	 	var index = (((nearestPoint / separation)<<1)>>1) + this.globals.startIndex;
+	 	var index = (((nearestPoint / separation)<<1)>>1);
 	 	
 	 	return index;
     };
 
     Alice.prototype.scroll = function(dx){
     	var startIndex = this.globals.startIndex;
-    	if (startIndex+dx >=0 && startIndex+dx+this.globals.plottablePoints < Object.keys(this.Data).length)
+    	if (startIndex+dx < 0)
+    	{
+    		dx = -1*startIndex;
+    	} 
+    	else if(startIndex+dx+this.globals.plottablePoints > Object.keys(this.Data).length)
+    	{
+    		dx = Object.keys(this.Data).length-startIndex-this.globals.plottablePoints-1;
+    	}
+    	if (dx!=0)
     	{
 	    	this.globals.startIndex = this.globals.startIndex + dx;
 	    	this.draw();

@@ -76,7 +76,8 @@ function showToolTip(selected, mousePos)
 	else
 		tooltip.style.left = mousePos.x + 2 + 'px';
 }
-canvas.addEventListener('click', function(evt) {
+
+function clickHandler(evt) {
 	mousePos = {
       x: evt.clientX,
       y: evt.clientY
@@ -98,10 +99,7 @@ canvas.addEventListener('click', function(evt) {
     	console.log('nothing clicked');
     }
  	// showTooltip(mousePos, 5);
-}, false);
-
-a = new Alice(ctx);
-getData();
+}
 
 socket.on('realtime', function(data){
 	console.log(data);
@@ -149,22 +147,49 @@ function changeScale(event)
 	}
 }
 
+var mousePoint=[];
+
+function mouseDown(event){
+	if (event.touches)
+		event = event.touches[0];
+	mousePoint = [event.pageX, event.pageY];
+}
+
+function endDrag(event){
+	if (event.changedTouches)
+		event = event.changedTouches[0];
+	if (event.pageX != mousePoint[0] && event.pageY != mousePoint[1])
+	{
+		dx = 2 * ((((event.pageX - mousePoint[0])/60+0.5)<<1)>>1);
+		console.log('Moving by', dx)
+		a.scroll(2*dx);
+	}
+	else
+		clickHandler(event);
+}
+
 window.onload = function setup(){
 	a = new Alice(ctx);
 
 	buttons = document.getElementsByClassName('button');
 	for (var i=0;i<buttons.length;i++)
-		buttons[i].addEventListener('click', drawChart);
+		buttons[i].addEventListener('click', drawChart, false);
 
 	buttons[0].click();
 
 	tabs = document.getElementsByClassName('tab');
 	for (var i=0;i<tabs.length;i++)
-		tabs[i].addEventListener('click', changeScale);
+		tabs[i].addEventListener('click', changeScale, false);
 
 	scales = document.getElementsByClassName('scale');
 	for (var i=0;i<scales.length;i++)
-		scales[i].addEventListener('click', changeScale);
+		scales[i].addEventListener('click', changeScale, false);
+
+	canvas.addEventListener('mousedown', mouseDown, false);
+	canvas.addEventListener('mouseup', endDrag, false);
+
+	canvas.addEventListener('touchstart', mouseDown, false);
+	canvas.addEventListener('touchend', endDrag, false);
 
 	getData();
 };

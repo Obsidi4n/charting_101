@@ -71,7 +71,7 @@ body
 {
 	height: 85%;
 	width: 100%;
-	background-color:#222;
+	/*background-color:#222;*/
 	position: relative;
 }
 #buttonBar
@@ -88,23 +88,11 @@ body
 {
 	position: absolute;
 }
-#canvasMask
-{
-	/*overflow-x: scroll;*/
-	overflow-y: hidden;
-}
-#largeCanvas
-{
-	width: 300%;
-	height: 100%;    
-	right: 0;
-    position: absolute;
-}
 /*Layout ends here*/
 
 #loading
 {
-    background-color: rgba(100,100,100,0.9);
+    background-color: rgba(140,140,140,0.8);
     opacity: 0;
     pointer-events:none;
     transition: opacity 1s ease;
@@ -112,8 +100,8 @@ body
 
 #loading img
 {
-	width: 68px;
-	height: 25px;
+	width: 60px;
+	height: 20px;
 }
 
 .buttonContainers
@@ -145,7 +133,8 @@ body
 #scaleButton
 {
 	display:none;
-	padding:10px;
+	padding:5px;
+	position: absolute;
 	z-index:1;
 }
 
@@ -153,6 +142,7 @@ body
     padding:10px;
     border-radius:5px;
 	max-width:80px;
+	min-height: 20px;
     margin: 0;
     border-width:1px;
     border-style:solid;
@@ -166,10 +156,17 @@ body
     cursor:pointer;
 }
 
+.scaleButtonContainer div
+{
+	display: inline-block;
+	float: left;
+	margin:0 2px;
+}
 .scaleButtonContainer img
 {
 	width:20px;
 	height:20px;
+	display: block;
 }
 
 .scale {
