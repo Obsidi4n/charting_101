@@ -6,31 +6,41 @@ var ctx = canvas.getContext('2d');
 var tooltip = document.getElementById('tooltip'); 
 
 var respData;
-var getData =function(){
-	document.getElementById('loading').style.opacity = 1;
+var requestInProgress = false;
 
-	var xhr = new XMLHttpRequest()
-	xhr.open('POST', '/dataSource');
-	xhr.setRequestHeader('content-type','application/x-www-form-urlencoded');
-	xhr.onreadystatechange = function (e) {
-		if (xhr.readyState==4 && xhr.status==200)
-		{
-			respData = JSON.parse(this.response);
-			console.log('Data received', Object.keys(respData).length);
+function getData()
+{
+	if(!requestInProgress)
+	{
+		requestInProgress = true;
+		tooltip.style.display = 'none';
+		document.getElementById('loading').style.opacity = 1;
 
-			a.setData(respData);
-			a.draw();
-			document.getElementById('loading').style.opacity = 0;
-		}
-	};
-	var date = new Date();
-	// console.log(date.toISOString());
-	if(a.globals.plottablePoints<20)
-		a.globals.plottablePoints = 20;
+		var xhr = new XMLHttpRequest()
+		xhr.open('POST', '/dataSource');
+		xhr.setRequestHeader('content-type','application/x-www-form-urlencoded');
+		xhr.onreadystatechange = function (e) {
+			if (xhr.readyState==4 && xhr.status==200)
+			{
+				respData = JSON.parse(this.response);
+				console.log('Data received', Object.keys(respData).length);
 
-	urlParams = 'date='+ date.toString() +'&scale='+selectedScale+'&count='+3*a.globals.plottablePoints ;
-	console.log(urlParams);
-	xhr.send( urlParams );
+				a.setData(respData);
+				a.draw();
+
+				requestInProgress = false;
+				document.getElementById('loading').style.opacity = 0;
+			}
+		};
+		var date = new Date();
+		// console.log(date.toISOString());
+		if(a.globals.plottablePoints<20)
+			a.globals.plottablePoints = 20;
+
+		urlParams = 'date='+ date.toString() +'&scale='+selectedScale+'&count='+5*a.globals.plottablePoints ;
+		console.log(urlParams);
+		xhr.send( urlParams );
+	}
 }
 
 function drawChart(el)
@@ -77,7 +87,8 @@ function showToolTip(selected, mousePos)
 		tooltip.style.left = mousePos.x + 2 + 'px';
 }
 
-function clickHandler(evt) {
+function clickHandler(evt) 
+{
 	mousePos = {
       x: evt.clientX,
       y: evt.clientY
@@ -95,7 +106,6 @@ function clickHandler(evt) {
     }
     else
     {
-    	tooltip.style.display = 'none';
     	console.log('nothing clicked');
     }
  	// showTooltip(mousePos, 5);
@@ -105,14 +115,24 @@ socket.on('realtime', function(data){
 	console.log(data);
 	var key = Object.keys(data)[0];
 	respData[key] = data[key];
-	if (a.chartType == 'Line')
-	{
-		data[key] = data[key][3];
-	}
+	// if (a.chartType == 'Line')
+	// {
+	// 	data[key] = data[key][3];
+	// }
 	a.updateDataByKey(data);
 });
 
-function drop() {
+function switchLights()
+{
+	if (a.theme === 'dark')
+		document.body.style.background = '#AAA';
+	else
+		document.body.style.background = '#222';
+	a.flipColors();
+}
+
+function drop() 
+{
   if (document.getElementById('scaleItems').style.display === 'block') 
     document.getElementById('scaleItems').style.display = 'none';
   else
@@ -122,7 +142,7 @@ function drop() {
 function changeScale(event)
 {
 	originClass = event.currentTarget.className;
-	if (originClass.indexOf('active')===-1)
+	if (!requestInProgress && originClass.indexOf('active')===-1)
 	{
 		child = event.currentTarget;
 		var i = 0;
@@ -156,8 +176,10 @@ function mouseDown(event){
 }
 
 function endDrag(event){
+	tooltip.style.display = 'none';
 	if (event.changedTouches)
 		event = event.changedTouches[0];
+
 	if (event.pageX != mousePoint[0] && event.pageY != mousePoint[1])
 	{
 		dx = 2 * ((((event.pageX - mousePoint[0])/60+0.5)<<1)>>1);
@@ -193,22 +215,3 @@ window.onload = function setup(){
 
 	getData();
 };
-
-/*
-<script type="text/javascript">
-
-
-
-function changeScale(e)
-{
-  	id = e.srcElement.id;
-  	console.log(id);
-	
-}
-
-scales = document.querySelectorAll('.scale');
-for(i=0;i<scales.length;i++)
-	scales[i].addEventListener('click', changeScale);
-
-</script
-*/

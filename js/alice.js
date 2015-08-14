@@ -42,6 +42,38 @@
 		lineWidth: 0,
 		candleWidth: 0,
 	};
+
+	Alice.prototype.theme = 'dark';
+	Alice.prototype.colors = {
+		positiveFontColor: '#333',
+		negativeFontColor: '#EEE',
+		positiveFillColor: '#6699FF',
+		negativeFillColor: '#FF3366',
+	};
+
+	Alice.prototype.flipColors = function(){
+		if (this.theme === 'dark')
+		{
+			this.theme = 'light';
+			this.colors = {
+				positiveFontColor: '#EEE',
+				negativeFontColor: '#333',
+				positiveFillColor: '#6699FF',
+				negativeFillColor: '#FF3366',
+			}
+		}
+		else
+		{
+			this.theme = 'dark';
+			this.colors = {
+				positiveFontColor: '#333',
+				negativeFontColor: '#EEE',
+				positiveFillColor: '#6699FF',
+				negativeFillColor: '#FF3366',
+			}
+		}
+		this.draw();
+	};
 	
 	Alice.prototype.Data = [],
 	Alice.prototype.ScreenCoords=[];
@@ -54,7 +86,7 @@
 			var ctx = this.context;
 			ctx.lineWidth = 1;
 			ctx.globalAlpha = 0.1;
-			ctx.strokeStyle = '#EEE';
+			ctx.strokeStyle = this.colors.negativeFontColor;
 
 			var skipPoints = this.globals.pointsPerLabel;
 			var xLabelSeparation = this.globals.scale * this.globals.xLabelSeparation;
@@ -110,7 +142,7 @@
 				ctx.font= fontSize +'px sans-serif';
 			}
 			ctx.font= ((fontSize-2<<1)>>1) +'px sans-serif';
-			ctx.fillStyle = '#DDD';
+			ctx.fillStyle = this.colors.negativeFontColor;
 			ctx.textAlign = 'center';
 
 			for (var i = 0; i < this.globals.plottablePoints/skipPoints; i++) 
@@ -137,10 +169,10 @@
 			var rect = ctx.measureText(latestYLabel);
 			ctx.fillRect(this.canvas.width-yAxisPadding+labelPadding-padding , latestYPosition-fontOffset/2, rect.width+2*padding, 40);
 
-			ctx.fillStyle = '#000';
+			ctx.fillStyle = this.colors.positiveFontColor;
 			ctx.fillText(latestYLabel, this.canvas.width-yAxisPadding+labelPadding , latestYPosition+fontOffset);
 			
-			ctx.fillStyle = '#DDD';
+			ctx.fillStyle = this.colors.negativeFontColor;
 			var yRange = this.globals.globalHigh - this.globals.globalLow;
 			var increment = yRange / 10;
 			
@@ -200,7 +232,7 @@
 			// alice.globals.plottablePoints = 50;
 		}
 
-		alice.globals.plottablePoints = ((( availableWidth/(alice.globals.xLabelSeparation * alice.globals.scale) +0.5) <<1) >>1);
+		alice.globals.plottablePoints = ((( availableWidth/(alice.globals.xLabelSeparation * alice.globals.scale)+1) <<1) >>1);
 		alice.draw();
 	};
 
@@ -266,6 +298,10 @@
     	this.draw();
     };
 
+    Alice.prototype.prependData = function(data){
+    	// TODO to add data points to the start of the graph
+    };
+
     Alice.prototype.getClosestLabel = function(x){
 	 	var nearestPoint=-1;
 	 	var separation = this.globals.scale * this.globals.xLabelSeparation;
@@ -301,12 +337,11 @@
     };
     
     Alice.prototype.draw = function (data) {
-    	if(!data)
-    		data = this.Data;
+    	// Please initialize a graph type first
     };
 
     Alice.prototype.checkClick = function(x,y){
-    	
+    	// Please initialize a graph type first
     };
 
     Alice.prototype.Line = function(data){
@@ -330,8 +365,8 @@
 			    var virtualPixelConversion=this.globals.virtualPixelConversion;
 
 			    ctx.lineWidth = this.lineWidth;
-				ctx.strokeStyle = '#6699FF';
-				ctx.fillStyle = '#6699FF';
+				ctx.strokeStyle = this.colors.positiveFillColor;
+				ctx.fillStyle = this.colors.positiveFillColor;
 				var radius=6;
 
 				for (var i= startIndex; i<startIndex+points && i<keys.length-1; i++)
@@ -369,7 +404,8 @@
 					ctx.closePath();
 				}
 
-				ctx.strokeStyle = '#999';
+				ctx.strokeStyle = this.colors.negativeFontColor;
+				ctx.globalAlpha = 0.8;
 
 				var value = this.Data[keys[0]];
 				if(value.constructor == Array)
@@ -382,6 +418,7 @@
 				ctx.stroke();
 				ctx.closePath();
 
+				ctx.globalAlpha = 1;
 		    	if(this.globals.labelsDrawn)
 		    		this.drawLabels();
 			}
@@ -461,13 +498,13 @@
 						close = p["y"][3];
 						if(close<=open)  
 						{
-							ctx.strokeStyle = '#6699FF';
+							ctx.strokeStyle = this.colors.positiveFillColor;
 							ctx.fillStyle = "#6699FF";	
 						}				//Reversed operator since open and close are now coordinates from top 
 							
 						else{
 							ctx.strokeStyle = "#FF3366";
-							ctx.fillStyle = '#FF3366';
+							ctx.fillStyle = this.colors.negativeFillColor;
 						}
 
 						//Draw line at current position
@@ -502,7 +539,7 @@
 
 	        	var dx = x - closestPoint.x ;
 	        	
-	        	if (dx >= -7 && dx <= 7 && y >= closestPoint.y[1] && y <= closestPoint.y[2])
+	        	if (dx >= -10 && dx <= 10 && y >= closestPoint.y[1] && y <= closestPoint.y[2])
 	        		return this.globals.startIndex + closestIndex;
 	        	return false;
 	        };
@@ -537,7 +574,7 @@ Alice.prototype.CandleStick=function(data)
 				    var yfactor=dataLimits/displayLimits;
 				   
 				    ctx.lineWidth = this.globals.scale*1;
-				    ctx.strokeStyle = "#999";
+				    ctx.strokeStyle = "#EEE";
 				    
 				    this.barWidth = separation/3;
 					var open, close, high, low, x;
@@ -563,11 +600,15 @@ Alice.prototype.CandleStick=function(data)
 						else
 							ctx.fillStyle = "#FF3366";
 						
+						ctx.globalAlpha = 0.5;
+
 						ctx.beginPath();
 						ctx.moveTo(x,high);
 						ctx.lineTo(x,low);
 						ctx.stroke();
 						ctx.closePath();
+
+						ctx.globalAlpha = 1;
 
 						ctx.fillRect(x-this.barWidth/2, open, this.barWidth, close-open);
 					}
