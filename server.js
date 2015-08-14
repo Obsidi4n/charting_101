@@ -6,7 +6,7 @@ app = express();
 app.use(express.static(__dirname));
 
 
-var server = app.listen(7896);
+var server = app.listen(process.env.PORT || 7896);
 var io = require('socket.io').listen(server);
 
 var realtime, latestSentData;
