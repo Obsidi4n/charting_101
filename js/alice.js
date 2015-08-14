@@ -58,8 +58,8 @@
 			this.colors = {
 				positiveFontColor: '#EEE',
 				negativeFontColor: '#333',
-				positiveFillColor: '#6699FF',
-				negativeFillColor: '#FF3366',
+				positiveFillColor: '#009900',
+				negativeFillColor: '#F80000',
 			}
 		}
 		else
@@ -499,11 +499,11 @@
 						if(close<=open)  
 						{
 							ctx.strokeStyle = this.colors.positiveFillColor;
-							ctx.fillStyle = "#6699FF";	
+							ctx.fillStyle = this.colors.positiveFillColor;	
 						}				//Reversed operator since open and close are now coordinates from top 
 							
 						else{
-							ctx.strokeStyle = "#FF3366";
+							ctx.strokeStyle = this.colors.negativeFillColor;
 							ctx.fillStyle = this.colors.negativeFillColor;
 						}
 
@@ -574,7 +574,7 @@ Alice.prototype.CandleStick=function(data)
 				    var yfactor=dataLimits/displayLimits;
 				   
 				    ctx.lineWidth = this.globals.scale*1;
-				    ctx.strokeStyle = "#EEE";
+				    ctx.strokeStyle = this.colors.negativeFontColor;
 				    
 				    this.barWidth = separation/3;
 					var open, close, high, low, x;
@@ -596,9 +596,9 @@ Alice.prototype.CandleStick=function(data)
 						low   = p["y"][2];
 						close = p["y"][3];
 						if(close<=open)  				//Reversed operator since open and close are now coordinates from top 
-							ctx.fillStyle = "#6699FF";
+							ctx.fillStyle = this.colors.positiveFillColor;
 						else
-							ctx.fillStyle = "#FF3366";
+							ctx.fillStyle = this.colors.negativeFillColor;
 						
 						ctx.globalAlpha = 0.5;
 

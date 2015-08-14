@@ -124,10 +124,18 @@ socket.on('realtime', function(data){
 
 function switchLights()
 {
+	toggle = document.querySelector('#switch .desaturate');
+	toggleClass = 'imgColor';
 	if (a.theme === 'dark')
-		document.body.style.background = '#AAA';
+	{
+		document.body.style.background = '#eef';
+		toggle.className=toggle.className.replace(toggleClass,'');
+	}
 	else
+	{
 		document.body.style.background = '#222';
+		toggle.className+=' ' + toggleClass;
+	}
 	a.flipColors();
 }
 

@@ -213,10 +213,6 @@ body
 	border-bottom: 5px inset #6699ff;
 	height:95%;
 }
- #switch 
- {
- 	display: none;
- }
 .tab, #refresh img, #switch img
 {
 	cursor: pointer;
@@ -226,8 +222,8 @@ body
 	margin-top:10px;
 	margin-right:10px;
 }
-img.desaturate { filter: grayscale(100%); }
-img.desaturate { -webkit-filter: grayscale(100%); filter: grayscale(100%); }
+img.imgColor { filter: grayscale(100%); }
+img.imgColor { -webkit-filter: grayscale(100%); filter: grayscale(100%); }
 .button:hover
 {
 	background:#222;
