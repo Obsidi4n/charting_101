@@ -17,7 +17,7 @@ router.use(bodyparser.urlencoded({ extended: true }));
 app.use('/', router); 
 
 router.get('/',function(req,res){
-	console.log('Sending response');
+	//console.log('Sending response');
     res.sendFile('index.html', { root: __dirname});
 });
 
@@ -80,13 +80,13 @@ Date.prototype.formatDate = function (measure) {
 function clipTimeToScale(date, unit, measure)
 {
 	date.setTime( date.getTime() + date.getTimezoneOffset()*60*1000 );
-	console.log("Before clipping",date);
+	//console.log("Before clipping",date);
 	date.setMilliseconds(0);
 	date.setSeconds(0);
 
 	//If before or after market hours
 	date.limitToMarketOpen();
-	console.log("After limiting",date);
+	//console.log("After limiting",date);
 	min = date.getMinutes();
 
 	//Round to closest scale multiple
@@ -125,21 +125,21 @@ function clipTimeToScale(date, unit, measure)
 			}
 		}
 	}
-	console.log("After clipping", date);
+	//console.log("After clipping", date);
 	return date;
 }
 
 router.post('/dataSource',function(req,res){
-	console.log('Generating data');
-	// console.log(req.body['date']);
+	//console.log('Generating data');
+	// //console.log(req.body['date']);
 
 	var date = new Date(req.body['date']);
 	var unit = req.body['scale'].replace(/\D/g, '');			//Replace all non-numerals with ''
 	var measure = req.body['scale'].replace(/[^a-z]/gi, '');	//Replace all non-alphabets with ''
 	var count = req.body['count'];
 
-	console.log('Units '+ unit + '. Measure '+ measure);
-	// console.log('Points to generate: '+count);
+	//console.log('Units '+ unit + '. Measure '+ measure);
+	// //console.log('Points to generate: '+count);
 
 	labelStamp = clipTimeToScale(date, unit, measure);
 	var data = {};
@@ -167,12 +167,12 @@ router.post('/dataSource',function(req,res){
 			labelStamp.deductTime(unit, measure);
 			label = labelStamp.formatDate(measure);
 		}
-		// console.log(label);
+		// //console.log(label);
 		data[label] = values;
 		close = open;
 	}
-	console.log(labelStamp);
-	console.log('Data length', Object.keys(data).length);
+	//console.log(labelStamp);
+	//console.log('Data length', Object.keys(data).length);
 
 	return res.json(data);;
 });
@@ -185,7 +185,7 @@ function streamer(){
 		latestSentData[2] = newRate;
 	latestSentData[3] = newRate;
 
-	console.log(latestSentData);
+	//console.log(latestSentData);
 	io.emit('realtime', {'T': latestSentData} );
 }
 
@@ -202,11 +202,11 @@ var users = 0;
 
 io.on('connection', function(socket){
 	users++;
-  	console.log('Mazel tov! Someone connected. Users left: ', users);
+  	//console.log('Mazel tov! Someone connected. Users left: ', users);
   socket.on('disconnect', function(){
   	users--;
-    console.log('Someone doesnt like their coffee black. Users left: ', users);
+    //console.log('Someone doesnt like their coffee black. Users left: ', users);
   });
 });
 
-console.log("All cool! I'm ready and listening on 7896");
+//console.log("All cool! I'm ready and listening on 7896");
