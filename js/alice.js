@@ -2,8 +2,13 @@
 
 	"use strict";
 
+	//This keeps then chart object in scope, just in case needed
 	var globalChart = null;
 
+
+	//The initiailization of alice, this where 
+	//The canvas and context gets picked up
+	//Resize functions is appended
 	var Alice = function(context){
 		this.canvas = context.canvas;
 		this.context = context;
@@ -21,29 +26,43 @@
 	};
 
 	Alice.prototype.chartType = null;
+
+	//Fields that are used as configuration variables for the general graph properties
 	Alice.prototype.globals = {
 		//Scale variable to increase canvas density
 		scale : 2,
-		plottablePoints: 60,
 
+		//Points to be drawn and density
+		plottablePoints: 60,
 		pointsPerLabel: 4,
+
+		//Axes properties
 		xLabelSeparation : 40,
 		yLabels : 10,
 		yAxisPadding : 50,
 		xAxisPadding : 25,
 		overflow : 5,
-
-		clickRadius: 5,
-		startIndex: 0,
-
 		labelsDrawn: true,
 		gridsDrawn: true,
+
+		//Click radius
+		clickRadius: 5,
+
+		//Scroll is done through the following value change
+		startIndex: 0,
+
+		//Each graphs configuration property. 
+		//Values to be defined in the corresponsing draw function
 		barWidth: 0,
 		lineWidth: 0,
 		candleWidth: 0,
 	};
 
+	//Color configurations
+	//Name the theme like this
 	Alice.prototype.theme = 'dark';
+
+	//Define the four colors used
 	Alice.prototype.colors = {
 		positiveFontColor: '#333',
 		negativeFontColor: '#EEE',
@@ -51,6 +70,7 @@
 		negativeFillColor: '#FF3366',
 	};
 
+	//Sample flip color function
 	Alice.prototype.flipColors = function(){
 		if (this.theme === 'dark')
 		{
@@ -75,12 +95,16 @@
 		this.draw();
 	};
 	
+	//Data copy set by the setData call
 	Alice.prototype.Data = [],
+
+	//Data coordinates as plotted. This SHOULD be emptied and populated in each draw function
 	Alice.prototype.ScreenCoords=[];
 
 	// Alice.prototype.XLabels = [];
 	// Alice.prototype.YLabels = [];
 
+	//Draw grid function. NOTE: This is only the skeleton lines
 	Alice.prototype.drawGrids = function(){
 
 			var ctx = this.context;
@@ -120,6 +144,8 @@
 			ctx.globalAlpha = 1;
 	};
 
+	//Adding labels to drawn grid. 
+	//NOTE Calling drawGrid before calling drawLabels makes logical sense, but is not a requirement
 	Alice.prototype.drawLabels = function(){
 		if(this.Data && Object.keys(this.Data).length > 1)
 		{
@@ -187,6 +213,8 @@
 		}
 	};
 
+	//Clear only the graph plot area
+	//Call createFreshGraph if you want to clear the entire graph
 	Alice.prototype.clearGrids = function(){
 		var xAxisPadding = this.globals.scale * this.globals.xAxisPadding;
 		var yAxisPadding = this.globals.scale * this.globals.yAxisPadding;
@@ -195,6 +223,8 @@
 		this.globals.gridsDrawn = false;
 	};
 
+	//Clear only labels
+	//Call createFreshGraph if you want to clear the entire graph
 	Alice.prototype.clearLabels = function(){
 		var xAxisPadding = this.globals.scale * this.globals.xAxisPadding;
 		var yAxisPadding = this.globals.scale * this.globals.yAxisPadding;
@@ -204,6 +234,8 @@
 		this.globals.labelsDrawn = false;
 	};
 
+	//Add this as an eventListener to the resize function of the chart element/body/window
+	//This is already done in the initializing function
 	Alice.prototype.recalibrate = function(source){
 		if (!source)
 			var alice = this;
@@ -236,13 +268,19 @@
 		alice.draw();
 	};
 
-
+	//Move to view logic since user may wish to manipulate clicked element differently
 	Alice.prototype.Tooltip = {
 		draw: function(){
 
 		},//TODO Draw function for tooltip
 	};
      
+    //Function that sets data to be plotted
+    //Also calculates the high and low  and the ratio for value limits to display limits
+    //The valueLimits:display limits is called virtualPixelConversion and is used to dynamically set limits oh graph
+
+    //Calling this will not plot the graph. Please use the draw function after setting data to plot.
+    //NOTE: Draw function will be initialized only after graphType has been initialized
     Alice.prototype.setData = function(data){
     		this.Data = data;
     		var keys = Object.keys(data);
@@ -285,6 +323,8 @@
 			this.globals.startIndex = 0;
     	};
 
+    //Combined function that clears entire grid.
+    //RECOMMENDED to be called at the start of draw function
     Alice.prototype.createFreshGraph = function(){
     	this.context.clearRect(0,0, this.canvas.width, this.canvas.height);
 		this.ScreenCoords = [];
@@ -292,6 +332,8 @@
     		this.drawGrids()
     };
 
+    //Used to push realtime updates or corrections.
+    //This will force a redraw
     Alice.prototype.updateDataByKey = function(data){
     	var key = Object.keys(data)[0];
     	this.Data[key] = data[key];
@@ -302,6 +344,8 @@
     	// TODO to add data points to the start of the graph
     };
 
+    //Common function across all graphs that calculates closest clicked point
+    //Returns the x-index
     Alice.prototype.getClosestLabel = function(x){
 	 	var nearestPoint=-1;
 	 	var separation = this.globals.scale * this.globals.xLabelSeparation;
@@ -319,6 +363,9 @@
 	 	return index;
     };
 
+    //Scroll function used to change starting index
+    //In general, scroll can be done by changing start index and redrawing
+    //Keep start index within bounds
     Alice.prototype.scroll = function(dx){
     	var startIndex = this.globals.startIndex;
     	if (startIndex+dx < 0)
@@ -344,6 +391,30 @@
     	// Please initialize a graph type first
     };
 
+
+    //Main logic of all plots below
+
+    //In a nutshell, each graph type needs the following
+    
+    //chartType 	- String title for graph
+    
+    //draw    		- Function that holds the drawing logic.
+    //A sample draw function should 
+    //		1) Clear the graph
+	//		2) Pick up all the globals axes configuration
+	//		3) Iterate through this.Data and convert all the values to their corresponding display coordinates
+	// 		4) Push plotted coordinates to this.ScreenCoords to be used in checkClick
+
+    //checkClick	- Function that holds the custom drawn plot and returns the data
+    //This function is meant to be used to query if given coordinates (like that of a click/touch) are within the plotted elements
+    //You can used this.getClosestLabel on the x-coordinates to hunt down your required point and then used the corresponsing 
+    //y-coords from this.ScreenCoords to decide if you want to accept this as a click or not.
+    //If positive, then return INDEX of the clicked element.
+    //this.Data[index] will give you values, if needed
+    
+    //Additionally, add check for data being passed and draw, if data is set
+
+    //Line graph
     Alice.prototype.Line = function(data){
     	this.chartType = 'Line';
     	this.lineWidth = this.globals.scale*1;
@@ -451,6 +522,7 @@
     		this.draw();
     };
 
+    //Bar graph
 	Alice.prototype.Bar=function(data)
     	{
 	    	this.chartType = 'Bar';
@@ -551,7 +623,8 @@
 	    		this.draw();
     	};     	
 
-Alice.prototype.CandleStick=function(data)
+    //Candlestick graph
+	Alice.prototype.CandleStick=function(data)
     	{
 	    	this.chartType = 'CandleStick';
 	    	this.barWidth = 0;
@@ -645,5 +718,6 @@ Alice.prototype.CandleStick=function(data)
 	    		this.draw();
     	};    
 
+    //Finally, add alice to the calling window to make it visible
     window.Alice = Alice;
 }).call(this);
