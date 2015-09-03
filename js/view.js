@@ -14,22 +14,37 @@ function getData()
 	{
 		requestInProgress = true;
 		tooltip.style.display = 'none';
+		document.getElementById('no-data').style.display = 'none';
 		document.getElementById('loading').style.opacity = 1;
 
 		var xhr = new XMLHttpRequest()
 		xhr.open('POST', '/dataSource');
 		xhr.setRequestHeader('content-type','application/x-www-form-urlencoded');
 		xhr.onreadystatechange = function (e) {
-			if (xhr.readyState==4 && xhr.status==200)
+			if (xhr.readyState==4 )
 			{
-				respData = JSON.parse(this.response);
-				console.log('Data received', Object.keys(respData).length);
+				if (xhr.status==200)
+				{
+					try
+					{	
+						respData = JSON.parse(this.responseText);
+					}
+					catch (err)
+					{
+						console.log('Failed parsing JSON. Cause: ', err);
+						console.log('Response received: ', this.responseText);
+						failedDataLoad();
+					}
+					console.log('Data received', Object.keys(respData).length);
 
-				a.setData(respData);
-				a.draw();
+					a.setData(respData);
+					a.draw();
 
-				requestInProgress = false;
-				document.getElementById('loading').style.opacity = 0;
+					requestInProgress = false;
+					document.getElementById('loading').style.opacity = 0;
+				}
+				else
+					failedDataLoad();
 			}
 		};
 		var date = new Date();
@@ -41,6 +56,12 @@ function getData()
 		console.log(urlParams);
 		xhr.send( urlParams );
 	}
+}
+
+function failedDataLoad()
+{
+	document.getElementById('loading').style.opacity = 0;
+	document.getElementById('no-data').style.display = 'table';
 }
 
 function drawChart(el)

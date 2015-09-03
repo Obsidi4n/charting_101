@@ -83,7 +83,7 @@ body
 	height: 100%;
 	width: 100%;
 }
-#canvasMask, #loading
+#canvasMask, #loading, #no-data
 {
 	position: absolute;
 }
@@ -104,7 +104,12 @@ body
 	display: block;
 	margin: 0px auto;
 }
-
+.dataError
+{
+	color: #FFF;
+	margin: 0px auto;
+	width: 20%;
+}
 .buttonContainers
 {
 	min-width: 150px;
