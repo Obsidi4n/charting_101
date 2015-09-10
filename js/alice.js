@@ -37,7 +37,7 @@
 		pointsPerLabel: 4,
 
 		//Axes properties
-		xLabelSeparation : 40,
+		xLabelSeparation : 25,
 		yLabels : 10,
 		yAxisPadding : 50,
 		xAxisPadding : 25,
@@ -254,7 +254,6 @@
 			alice.globals.clickRadius = 10;
 			alice.globals.xAxisPadding = 15;
 			alice.globals.yAxisPadding = 30;
-			alice.globals.xLabelSeparation = 20;
 			// alice.globals.plottablePoints = 25;
 		}
 		else
@@ -262,7 +261,6 @@
 			alice.globals.clickRadius = 5;
 			alice.globals.xAxisPadding = 25;
 			alice.globals.yAxisPadding = 50;
-			alice.globals.xLabelSeparation = 25;
 			// alice.globals.plottablePoints = 50;
 		}
 
@@ -354,14 +352,13 @@
 
 	 	var invertedXCoord= this.canvas.width - x - this.globals.yAxisPadding * this.globals.scale ;
 	 	var modX = invertedXCoord % separation;
-	 	
 	 	if( modX < separation/2)
 	 		nearestPoint=invertedXCoord-modX;
 	 	else
 	 		nearestPoint=invertedXCoord+modX;
 
 	 	var index = (((nearestPoint / separation)<<1)>>1);
-	 	
+
 	 	return index;
     };
 
@@ -401,6 +398,45 @@
     	if(alice.globals.steps)
     		requestAnimationFrame( alice.scrollAnimate );
     		// clearInterval(alice.globals.scrolling);
+    };
+
+    Alice.prototype.zoom = function(pivotPoint, dx, dy, direction){
+    	if ( (direction===1 && this.globals.startIndex+this.globals.plottablePoints < Object.keys(this.Data).length)|| 	 //Pinch out
+    		 (direction===-1 && this.globals.plottablePoints>8 ) )								//Pinch in
+    	{
+	    	var xDisplacement = this.canvas.getBoundingClientRect().left;
+			var yDisplacement = this.canvas.getBoundingClientRect().top	;
+			var virtualPixelConversion = this.globals.virtualPixelConversion;
+
+			var x = (pivotPoint.x-xDisplacement) * this.globals.scale;
+			var y = (pivotPoint.y-yDisplacement) * this.globals.scale;
+
+	    	// alert(dx);
+	    	this.globals.xLabelSeparation += direction*Math.floor(dx/20);
+
+			var yStart = this.globals.scale * this.globals.yAxisPadding;
+			var availableWidth = this.canvas.width - yStart;
+	    	var newPlottablePoints = ((( availableWidth/(this.globals.xLabelSeparation * this.globals.scale)+1) <<1) >>1);
+	    	var numberOfPointsIncreased = newPlottablePoints-this.globals.plottablePoints;
+
+	    	var pivotIndex = this.getClosestLabel(x);
+	    	var startIndex = this.globals.startIndex;
+	    	// var indexToDisplace = Math.floor(((pivotIndex-(this.globals.plottablePoints/2+startIndex))/this.globals.plottablePoints/2 )*numberOfPointsIncreased);
+	    	var indexToDisplace=Math.floor(numberOfPointsIncreased/2);
+
+	    	if(startIndex-indexToDisplace+this.globals.plottablePoints > Object.keys(this.Data).length)
+	  			indexToDisplace = startIndex+this.globals.plottablePoints-Object.keys(this.Data).length;
+	  		else if(startIndex+indexToDisplace<0)
+	  			indexToDisplace = startIndex;
+			
+			this.globals.startIndex += indexToDisplace;
+			this.globals.plottablePoints = newPlottablePoints;
+			
+			// console.log('Changing grid size by '+direction*Math.floor(dx/20)+'. Increase in number of points '+numberOfPointsIncreased);
+			// console.log(indexToDisplace+':'+(numberOfPointsIncreased-indexToDisplace));
+	    	this.createFreshGraph();
+	    	this.draw();
+	    }
     };
     
     Alice.prototype.draw = function (data) {

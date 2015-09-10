@@ -196,27 +196,103 @@ function changeScale(event)
 	}
 }
 
-var mousePoint=[];
+var firstTouch=[];
+var scaling = 0, 
+	// pinchTouches =[],
+	pivot, prevSeparation, direction, touchTimer;
 
 function mouseDown(event){
 	if (event.touches)
+	{
+		if(event.touches.length === 2) 
+		{
+    		scaling = 2;
+    		// pinchTouches.push(event.touches[0], event.touches[1]);
+    		prevSeparation = separation(event.touches[0], event.touches[1]);
+    		pivot = {'x': (event.touches[0].pageX+event.touches[1].pageX)/2,
+    				 'y': (event.touches[0].pageY+event.touches[1].pageY)/2};
+    		touchTimer = new Date();
+    		// alert('scaling' + event.touches[0].pageX + ' ' + pinchTouches.pageX);
+   			// console.log(event.touches[0].pageX, ':' , event.touches[0].pageY, ' ', event.touches[1].pageX, ':', event.touches[1].pageY);
+    	}
 		event = event.touches[0];
-	mousePoint = [event.pageX, event.pageY];
+	}
+	firstTouch = [event.pageX, event.pageY];
+}
+
+function separation(p,p1)
+{
+	var separate = {'x': Math.abs(p.pageX-p1.pageX),
+					'y': Math.abs(p.pageY-p1.pageY)};
+
+	separate['distance'] = Math.sqrt(separate.x*separate.x + separate.y*separate.y );
+	return separate;	
+}
+
+function preventScroll(event) {
+	event.preventDefault();
+	// event = event.touches[0];
+	if(scaling && new Date()-touchTimer>100)
+	{
+		touchTimer = new Date();
+
+		newSeparation = separation(event.touches[0],event.touches[1]);
+		dx = Math.abs(newSeparation.x - prevSeparation.x);
+		dy = Math.abs(newSeparation.y - prevSeparation.y);
+		direction = (newSeparation.distance-prevSeparation.distance>0) ? 1 : -1;
+		
+		console.log(dx+':'+dy+':'+direction);
+		a.zoom(pivot, dx, dy, direction);
+
+		prevSeparation = newSeparation;
+	}
 }
 
 function endDrag(event){
 	tooltip.style.display = 'none';
-	if (event.changedTouches)
-		event = event.changedTouches[0];
-
-	if (event.pageX != mousePoint[0] && event.pageY != mousePoint[1])
-	{
-		dx = 2 * ((((event.pageX - mousePoint[0])/60+0.5)<<1)>>1);
-		console.log('Moving by', dx)
-		a.scroll(2*dx);
-	}
+	if(scaling)
+		scaling--;
+	// 	// newsecondTouch = event.changedTouches[1];
+	// 	if (pinchTouches.length>4)
+	// 	{
+	// 		// var x = y= [];
+	// 		// for(var i=0; i<4; i++)
+	// 		// {
+	// 		// 	x.push(pinchTouches[i].pageX);
+	// 		// 	y.push(pinchTouches[i].pageY);
+	// 		// }
+	// 		// x.sort();
+	// 		// y.sort();
+	// 		// dx = x[1] + x[3] - x[0] - x[2];
+	// 		// dy = y[1] + y[3] - y[0] - y[2];
+	// 		alert('First touch: '+ pinchTouches[0].pageX + ' ' + pinchTouches[0].pageY + '\n' +
+	// 			  'Second touch: '+ pinchTouches[1].pageX + ' ' + pinchTouches[1].pageY + '\n' +
+	// 			  'Third touch: '+ pinchTouches[2].pageX + ' ' + pinchTouches[2].pageY + '\n' +
+	// 			  'Fourth touch: '+ pinchTouches[3].pageX + ' ' + pinchTouches[3].pageY + '\n' );
+	// 		// if (dx * dy > 0)
+	// 		// {
+	// 		// 	alert('pinch '+ dx + ' ' +dy);
+	// 		// }
+	// 		pinchTouches = [];
+			
+	// 	}
+	// 	else
+	// 		pinchTouches.push(event.changedTouches[0]);
+	// }
 	else
-		clickHandler(event);
+	{
+		if (event.changedTouches)
+			event = event.changedTouches[0];
+
+		if (event.pageX != firstTouch[0] && event.pageY != firstTouch[1])
+		{
+			dx = 2 * ((((event.pageX - firstTouch[0])/60+0.5)<<1)>>1);
+			// console.log('Moving by', dx)
+			a.scroll(2*dx);
+		}
+		else
+			clickHandler(event);
+	}
 }
 
 window.onload = function setup(){
@@ -240,7 +316,8 @@ window.onload = function setup(){
 	canvas.addEventListener('mouseup', endDrag, false);
 
 	canvas.addEventListener('touchstart', mouseDown, false);
+	canvas.addEventListener('touchmove', preventScroll, false);
 	canvas.addEventListener('touchend', endDrag, false);
-
+	// alert('pinch '+ dx + ' ' +dy);
 	getData();
 };
