@@ -232,17 +232,31 @@ function separation(p,p1)
 function preventScroll(event) {
 	event.preventDefault();
 	// event = event.touches[0];
-	if(scaling && new Date()-touchTimer>100)
+	if(scaling && event.touches.length === 2 && new Date()-touchTimer>100)
 	{
 		touchTimer = new Date();
 
 		newSeparation = separation(event.touches[0],event.touches[1]);
-		dx = Math.abs(newSeparation.x - prevSeparation.x);
-		dy = Math.abs(newSeparation.y - prevSeparation.y);
-		direction = (newSeparation.distance-prevSeparation.distance>0) ? 1 : -1;
+		direction = (newSeparation.distance-prevSeparation.distance>0) ? -1 : 1;
 		
+		ratio = Math.abs(newSeparation.x - prevSeparation.x)/Math.abs(newSeparation.y - prevSeparation.y);
+		//Cotangent values of 72, 54, 36...
+		if (ratio>3)
+			dx = 4;
+		else if (ratio > 1.4)
+			dx = 3;
+		else if (ratio > 0.7)
+			dx = 2;
+		else if (ratio > 0.3)
+			dx = 1;
+		else
+			dx = 0;
+
+		dy=direction*(4-dx);
+		dx*=direction;
+
 		console.log(dx+':'+dy+':'+direction);
-		a.zoom(pivot, dx, dy, direction);
+		a.zoom(pivot, dx, dy);
 
 		prevSeparation = newSeparation;
 	}
@@ -252,33 +266,6 @@ function endDrag(event){
 	tooltip.style.display = 'none';
 	if(scaling)
 		scaling--;
-	// 	// newsecondTouch = event.changedTouches[1];
-	// 	if (pinchTouches.length>4)
-	// 	{
-	// 		// var x = y= [];
-	// 		// for(var i=0; i<4; i++)
-	// 		// {
-	// 		// 	x.push(pinchTouches[i].pageX);
-	// 		// 	y.push(pinchTouches[i].pageY);
-	// 		// }
-	// 		// x.sort();
-	// 		// y.sort();
-	// 		// dx = x[1] + x[3] - x[0] - x[2];
-	// 		// dy = y[1] + y[3] - y[0] - y[2];
-	// 		alert('First touch: '+ pinchTouches[0].pageX + ' ' + pinchTouches[0].pageY + '\n' +
-	// 			  'Second touch: '+ pinchTouches[1].pageX + ' ' + pinchTouches[1].pageY + '\n' +
-	// 			  'Third touch: '+ pinchTouches[2].pageX + ' ' + pinchTouches[2].pageY + '\n' +
-	// 			  'Fourth touch: '+ pinchTouches[3].pageX + ' ' + pinchTouches[3].pageY + '\n' );
-	// 		// if (dx * dy > 0)
-	// 		// {
-	// 		// 	alert('pinch '+ dx + ' ' +dy);
-	// 		// }
-	// 		pinchTouches = [];
-			
-	// 	}
-	// 	else
-	// 		pinchTouches.push(event.changedTouches[0]);
-	// }
 	else
 	{
 		if (event.changedTouches)

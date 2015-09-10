@@ -158,18 +158,19 @@
 			var skipPoints = this.globals.pointsPerLabel;
 			
 			var separation = this.globals.scale * this.globals.xLabelSeparation;
-			var fontSize = (((this.canvas.width/separation) << 1 ) >> 1);
-			var fontOffset = 20;
+			var fontSize = 30;
+			var fontOffset = 0;
 
 			var ctx = this.context;	
 			ctx.font= fontSize +'px sans-serif';
 			var xLabels = Object.keys(this.Data);
-			while(ctx.measureText(xLabels[1]).width > skipPoints * separation)
+			while(ctx.measureText(xLabels[1]).width+10 > skipPoints * separation)
 			{
 				fontSize-=1;
 				ctx.font= fontSize +'px sans-serif';
 			}
-			ctx.font= ((fontSize-2<<1)>>1) +'px sans-serif';
+
+			ctx.font= (((fontSize-fontOffset)<<1)>>1) +'px sans-serif';
 			ctx.fillStyle = this.colors.negativeFontColor;
 			ctx.textAlign = 'center';
 
@@ -180,7 +181,7 @@
 			}
 			console.log(i,' labels drawn on X-axis');
 
-			ctx.font= ((fontSize+2<<1)>>1) +'px sans-serif';
+			ctx.font= (((fontSize)<<1)>>1) +'px sans-serif';
 			ctx.textAlign = 'left';
 			
 			var conversion = this.globals.virtualPixelConversion;
@@ -195,7 +196,7 @@
 			var labelPadding = this.globals.scale * 5;
 			var padding = 5;
 			var rect = ctx.measureText(latestYLabel);
-			ctx.fillRect(this.canvas.width-yAxisPadding+labelPadding-padding , latestYPosition-fontOffset/2, rect.width+2*padding, 40);
+			ctx.fillRect(this.canvas.width-yAxisPadding+labelPadding-padding , latestYPosition-fontOffset/2-22, rect.width+2*padding, 45);
 
 			ctx.fillStyle = this.colors.positiveFontColor;
 			ctx.fillText(latestYLabel, this.canvas.width-yAxisPadding+labelPadding , latestYPosition+fontOffset);
@@ -400,37 +401,43 @@
     		// clearInterval(alice.globals.scrolling);
     };
 
-    Alice.prototype.zoom = function(pivotPoint, dx, dy, direction){
-    	if ( (direction===1 && this.globals.startIndex+this.globals.plottablePoints < Object.keys(this.Data).length)|| 	 //Pinch out
-    		 (direction===-1 && this.globals.plottablePoints>8 ) )								//Pinch in
+    Alice.prototype.zoom = function(pivotPoint, dx, dy){
+    	var newXSeparation = this.globals.xLabelSeparation - dx*2;
+    	
+    	var yStart = this.globals.scale * this.globals.yAxisPadding;
+		var availableWidth = this.canvas.width - yStart;
+	    var newPlottablePoints = ((( availableWidth/(newXSeparation * this.globals.scale)+1) <<1) >>1);
+
+    	if ( dx && (newPlottablePoints<50) && ( newPlottablePoints < Object.keys(this.Data).length) && (newPlottablePoints>8 ) )
     	{
 	    	var xDisplacement = this.canvas.getBoundingClientRect().left;
 			var yDisplacement = this.canvas.getBoundingClientRect().top	;
 			var virtualPixelConversion = this.globals.virtualPixelConversion;
 
 			var x = (pivotPoint.x-xDisplacement) * this.globals.scale;
-			var y = (pivotPoint.y-yDisplacement) * this.globals.scale;
-
-	    	// alert(dx);
-	    	this.globals.xLabelSeparation += direction*Math.floor(dx/20);
-
-			var yStart = this.globals.scale * this.globals.yAxisPadding;
-			var availableWidth = this.canvas.width - yStart;
-	    	var newPlottablePoints = ((( availableWidth/(this.globals.xLabelSeparation * this.globals.scale)+1) <<1) >>1);
-	    	var numberOfPointsIncreased = newPlottablePoints-this.globals.plottablePoints;
-
 	    	var pivotIndex = this.getClosestLabel(x);
+	    	
 	    	var startIndex = this.globals.startIndex;
-	    	// var indexToDisplace = Math.floor(((pivotIndex-(this.globals.plottablePoints/2+startIndex))/this.globals.plottablePoints/2 )*numberOfPointsIncreased);
-	    	var indexToDisplace=Math.floor(numberOfPointsIncreased/2);
+	    	var indexToDisplace=0;
 
-	    	if(startIndex-indexToDisplace+this.globals.plottablePoints > Object.keys(this.Data).length)
-	  			indexToDisplace = startIndex+this.globals.plottablePoints-Object.keys(this.Data).length;
-	  		else if(startIndex+indexToDisplace<0)
-	  			indexToDisplace = startIndex;
+	    	if( (pivotIndex-startIndex) < this.globals.plottablePoints/2)
+	  			indexToDisplace = dx;
+	  		// else
+	  		// 	indexToDisplace = (((dx/2)<<1)>>1);
 			
-			this.globals.startIndex += indexToDisplace;
+			startIndex += indexToDisplace;
+
+			if(startIndex+newPlottablePoints>=Object.keys(this.Data).length)
+				startIndex = Object.keys(this.Data).length-newPlottablePoints;
+			
+			if (startIndex<0)
+				startIndex = 0;
+			this.globals.startIndex = startIndex;
+			this.globals.xLabelSeparation = newXSeparation;
 			this.globals.plottablePoints = newPlottablePoints;
+
+			var skips = (((newPlottablePoints/3)<<1)>>1);
+			this.globals.skipPoints = (skips<4) ? 4 : skips;
 			
 			// console.log('Changing grid size by '+direction*Math.floor(dx/20)+'. Increase in number of points '+numberOfPointsIncreased);
 			// console.log(indexToDisplace+':'+(numberOfPointsIncreased-indexToDisplace));
